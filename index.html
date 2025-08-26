@@ -172,6 +172,14 @@
           <label class="badge" style="cursor:pointer"><input id="chk-hints" type="checkbox" style="margin-right:8px"/> Show move hints</label>
           <label class="badge" style="cursor:pointer"><input id="chk-paths" type="checkbox" style="margin-right:8px"/> Show shortest paths</label>
         </div>
+        <div class="row">
+          <label class="badge" style="cursor:pointer"><input id="chk-ai" type="checkbox" style="margin-right:8px"/> vs AI (P2)</label>
+          <div class="seg" id="ai-diff">
+            <button data-diff="easy">Easy</button>
+            <button data-diff="med" class="active">Med</button>
+            <button data-diff="hard">Hard</button>
+          </div>
+        </div>
         <div class="legend">
           <div class="muted">操作:</div>
           <div class="muted">駒を動かす場合は <strong>Move</strong> を選択し、緑の点をクリック。壁は <strong>Wall</strong> を選んで設置します（R で向き切替）。壁で両者の到達経路を完全に塞ぐことはできません。</div>
@@ -225,6 +233,10 @@
     history: [],       // for undo
     tool: 'move',      // 'move' | 'wall-h' | 'wall-v'
   };
+
+  // --- AI Settings --------------------------------------------------------
+  const ai = { enabled:false, side:1, diff:'med' };
+  let aiThinking = false;
 
   // --- Board Construction -------------------------------------------------
   const board = $('#board');
@@ -497,6 +509,30 @@
     renderPaths();
     renderInfo();
   }
+  // --- AI Player ----------------------------------------------------------
+  function pathLen(pid){ const p=shortestPath(pid); return (p&&p.length)? (p.length-1) : 999; }
+  function wallCandidatesFor(pid){
+    const opp=1-pid; const path=shortestPath(opp) || []; const cand=new Set(); const list=[];
+    function push(orient,x,y){ if(x==null||y==null) return; if(orient==='h'){ if(x<0||x>7||y<0||y>7) return; } else { if(x<0||x>7||y<0||y>7) return; } if(!canPlaceWall(orient,x,y)) return; const k=orient+':'+x+','+y; if(!cand.has(k)){ cand.add(k); list.push({type:'wall', orient, x, y}); } }
+    for(let i=0;i<path.length-1;i++){ const a=path[i], b=path[i+1]; if(a.x!==b.x){ const x=Math.min(a.x,b.x), y=a.y; push('v', x, y); push('v', x, y-1); } else { const x=a.x, y=Math.min(a.y,b.y); push('h', x, y); push('h', x-1, y); } }
+    return list;
+  }
+  function evaluate(){ const me=ai.side; const other=1-me; const myWin=(state.players[me].pos.y===state.players[me].goalY); const opWin=(state.players[other].pos.y===state.players[other].goalY); if(myWin) return 10000; if(opWin) return -10000; const myD=pathLen(me), opD=pathLen(other); const w=(state.players[me].walls - state.players[other].walls); return (opD - myD)*10 + w; }
+  function generateActions(pid, limitWalls=10){ const actions = legalMoves(pid).map(m=>({type:'move', x:m.x, y:m.y})); if(state.players[pid].walls>0){ let cands = wallCandidatesFor(pid); // rank by heuristic
+      cands.sort((A,B)=>{
+        const a=simulate({type:'wall',orient:A.orient,x:A.x,y:A.y}, ()=>evaluate());
+        const b=simulate({type:'wall',orient:B.orient,x:B.x,y:B.y}, ()=>evaluate());
+        return b-a; });
+      actions.push(...cands.slice(0, limitWalls)); }
+    return actions; }
+  function simulate(action, fn){ const snap=snapshot(); if(action.type==='move'){ const pid=state.turn; state.players[pid].pos={x:action.x, y:action.y}; state.turn=1-state.turn; } else { (action.orient==='h'? state.hWalls: state.vWalls).add(key(action.x,action.y)); state.players[state.turn].walls--; state.turn=1-state.turn; } const val=fn(); restore(snap); return val; }
+  function minimax(depth, alpha, beta){ if(depth===0) return evaluate(); const pid=state.turn; const maximizing = (pid===ai.side); const actions = generateActions(pid, 8); if(actions.length===0) return evaluate(); if(maximizing){ let best=-1e9; for(const a of actions){ const v=simulate(a, ()=>minimax(depth-1, alpha, beta)); if(v>best) best=v; if(v>alpha) alpha=v; if(beta<=alpha) break; } return best; } else { let best=1e9; for(const a of actions){ const v=simulate(a, ()=>minimax(depth-1, alpha, beta)); if(v<best) best=v; if(v<beta) beta=v; if(beta<=alpha) break; } return best; } }
+  function aiChoose(){ const pid=state.turn; const diff=ai.diff; if(diff==='easy'){ // greedy move towards goal, no walls
+      const moves = legalMoves(pid); if(moves.length===0) return null; let best=moves[0], bestVal=Infinity; for(const m of moves){ const val=simulate({type:'move', x:m.x, y:m.y}, ()=>pathLen(ai.side)); if(val<bestVal){ bestVal=val; best=m; } } return {type:'move', x:best.x, y:best.y}; }
+    if(diff==='med'){ let bestAct=null, bestScore=-1e9; const acts=generateActions(pid, 8); for(const a of acts){ const score=simulate(a, ()=>evaluate()); if(score>bestScore){ bestScore=score; bestAct=a; } } return bestAct; }
+    // hard
+    let bestAct=null, best=-1e9; const acts=generateActions(pid, 10); for(const a of acts){ const score=simulate(a, ()=>minimax(2, -1e9, 1e9)); if(score>best){ best=score; bestAct=a; } } return bestAct; }
+  function maybeAIMove(){ if(!ai.enabled) return; if(state.turn!==ai.side) { board.style.pointerEvents='auto'; return; } if(checkWin()) return; if(aiThinking) return; aiThinking=true; board.style.pointerEvents='none'; setTimeout(()=>{ const act=aiChoose(); if(!act){ aiThinking=false; board.style.pointerEvents='auto'; return; } if(act.type==='move') movePawnTo(state.turn, act.x, act.y); else placeWall(act.orient, act.x, act.y); aiThinking=false; board.style.pointerEvents='auto'; }, 120); }
 
   // --- Interaction --------------------------------------------------------
   function onCellClick(x,y){
@@ -513,7 +549,8 @@
     state.history.push(snapshot());
     action();
     renderAll();
-    checkWin();
+    const won = checkWin();
+    if(!won) setTimeout(maybeAIMove, 120);
   }
 
   function movePawnTo(pid, x, y){
@@ -633,6 +670,8 @@
   $('#tool-wall-v').addEventListener('click', ()=>{ state.tool='wall-v'; toggleToolButtons(); });
   $('#btn-undo').addEventListener('click', undo);
   $('#btn-new').addEventListener('click', ()=>{ newGame(); });
+  const chkAI = $('#chk-ai'); if(chkAI){ chkAI.addEventListener('change', e=>{ ai.enabled = e.target.checked; maybeAIMove(); }); }
+  const segAI = $('#ai-diff'); if(segAI){ segAI.addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; ai.diff = b.dataset.diff; [...segAI.querySelectorAll('button')].forEach(x=>x.classList.toggle('active', x.dataset.diff===ai.diff)); }); }
 
   document.addEventListener('keydown', (e)=>{
     if(e.key==='m' || e.key==='M'){ state.tool='move'; toggleToolButtons(); renderAll(); }
@@ -652,6 +691,7 @@
     state.tool='move'; toggleToolButtons();
     board.style.pointerEvents='auto';
     renderAll();
+    setTimeout(maybeAIMove, 100);
   }
 
   // --- Boot ---------------------------------------------------------------
