@@ -236,7 +236,9 @@
 
     for(let y=0; y<BOARD_N; y++){
       for(let x=0; x<BOARD_N; x++){
-        const c = el('div', { className:'cell', dataset:{ x, y } });
+        const c = el('div', { className:'cell' });
+        c.dataset.x = String(x);
+        c.dataset.y = String(y);
         // Place on grid (1-based line indices)
         c.style.gridColumn = (1 + x*2) + ' / span 1';
         c.style.gridRow    = (1 + y*2) + ' / span 1';
@@ -658,4 +660,3 @@
   </script>
 </body>
 </html>
-
