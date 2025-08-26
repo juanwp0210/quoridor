@@ -180,6 +180,9 @@
             <button data-diff="hard">Hard</button>
           </div>
         </div>
+        <div class="row">
+          <label class="badge" style="cursor:pointer"><input id="chk-diag" type="checkbox" style="margin-right:8px"/> Diagonal start mode</label>
+        </div>
         <div class="legend">
           <div class="muted">操作:</div>
           <div class="muted">駒を動かす場合は <strong>Move</strong> を選択し、緑の点をクリック。壁は <strong>Wall</strong> を選んで設置します（R で向き切替）。壁で両者の到達経路を完全に塞ぐことはできません。</div>
@@ -683,8 +686,14 @@
   });
 
   function newGame(){
-    state.players[0].pos = {x:4,y:0}; state.players[0].walls = WALLS_PER_PLAYER;
-    state.players[1].pos = {x:4,y:8}; state.players[1].walls = WALLS_PER_PLAYER;
+    const diag = document.querySelector('#chk-diag')?.checked;
+    if(diag){
+      state.players[0].pos = {x:0,y:0}; state.players[0].goalY = 8; state.players[0].walls = WALLS_PER_PLAYER;
+      state.players[1].pos = {x:8,y:8}; state.players[1].goalY = 0; state.players[1].walls = WALLS_PER_PLAYER;
+    } else {
+      state.players[0].pos = {x:4,y:0}; state.players[0].goalY = 8; state.players[0].walls = WALLS_PER_PLAYER;
+      state.players[1].pos = {x:4,y:8}; state.players[1].goalY = 0; state.players[1].walls = WALLS_PER_PLAYER;
+    }
     state.hWalls.clear(); state.vWalls.clear();
     state.history = [];
     state.turn = 0;
