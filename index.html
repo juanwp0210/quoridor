@@ -4,81 +4,37 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Quoridor — Web App</title>
-  <meta name="description" content="2-player Quoridor, playable in the browser. GitHub Pages-ready (single file)." />
+  <meta name="description" content="Quoridor playable in the browser. GitHub Pages-ready (single file)." />
   <style>
     :root{
-      --bg:#0f1220;          /* app background */
-      --panel:#171a2b;       /* side/top panels */
-      --ink:#e7eaf6;         /* text */
-      --muted:#9aa3c2;       /* secondary text */
-      --accent:#7aa2ff;      /* focus / primary */
-      --accent-2:#ffb454;    /* secondary accent */
-      --bad:#ff6b6b;         /* invalid preview */
-      --good:#33d17a;        /* valid preview */
-
-      --cell:56px;           /* one playable cell size */
-      --gap:12px;            /* wall lane thickness */
-      --board-radius:18px;
-      --shadow: 0 6px 24px rgba(0,0,0,.35);
+      --bg:#0f1220; --panel:#171a2b; --ink:#e7eaf6; --muted:#9aa3c2; --good:#33d17a; --cell:56px; --gap:12px; --board-radius:18px; --shadow:0 6px 24px rgba(0,0,0,.35);
     }
-
-    html, body { height: 100%; background: radial-gradient(1200px 800px at 10% -10%, #1a1f39 0%, var(--bg) 70%); color: var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif; margin:0; }
-
-    .app{ display:grid; grid-template-rows: auto 1fr; min-height:100dvh; }
-    header{ display:flex; align-items:center; gap:12px; padding:14px clamp(12px,3vw,24px); background: linear-gradient(180deg, #191d31 0%, #15192c 100%); border-bottom: 1px solid rgba(255,255,255,.06); position: sticky; top:0; z-index:10; }
-    header h1{ font-size: 18px; margin:0; letter-spacing:.3px }
-    .spacer{ flex: 1 }
-
-    main{ display:grid; grid-template-columns: minmax(300px, 1fr) auto minmax(260px, 380px); gap: clamp(12px, 3.5vw, 28px); padding: clamp(12px, 3.5vw, 28px); align-items: start; }
-
-    /* BOARD GRID: 17x17 tracks = 9 cells + 8 wall lanes, both directions */
-    #board{ display:grid; grid-template-columns: repeat(8, var(--cell) var(--gap)) var(--cell); grid-template-rows: repeat(8, var(--cell) var(--gap)) var(--cell); background: linear-gradient(180deg, #101322, #12162a); border-radius: var(--board-radius); padding: 14px; box-shadow: var(--shadow); position: relative; user-select:none; }
-
-    /* 9x9 playable squares */
-    .cell{ width: var(--cell); height: var(--cell); background: linear-gradient(180deg, #2a2f52, #212542); border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); position: relative; transition: transform .08s ease; }
-    .cell:hover{ outline: 2px solid rgba(255,255,255,.06); outline-offset: -2px }
-
-    /* Pawn pieces */
-    .pawn{ width: 56%; height: 56%; border-radius: 50%; position: absolute; inset:0; margin:auto; box-shadow: 0 6px 16px rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,255,255,.15); transform: translateZ(0); }
-    .p0{ background: radial-gradient(circle at 30% 25%, #9bc0ff, #5c86ff); }
-    .p1{ background: radial-gradient(circle at 30% 25%, #ffd59a, #ff9b40); }
-
-    /* Walls */
-    .wall{ position:absolute; background: linear-gradient(180deg, #84521a, #5a3511); border-radius: 6px; box-shadow: 0 8px 22px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.08) }
-    .wall.v{ width: var(--gap); height: calc(var(--cell)*2 + var(--gap)); }
-    .wall.h{ height: var(--gap); width: calc(var(--cell)*2 + var(--gap)); }
-
-    /* Hover preview */
-    .ghost{ position:absolute; pointer-events:none; opacity:.85; }
-    .ghost.valid{ background: linear-gradient(180deg, rgba(51,209,122,.85), rgba(38,160,90,.85)); box-shadow: 0 0 0 2px rgba(255,255,255,.15) inset, 0 0 0 1px rgba(0,0,0,.4); }
-    .ghost.invalid{ background: linear-gradient(180deg, rgba(255,107,107,.85), rgba(206,67,67,.85)); box-shadow: 0 0 0 2px rgba(255,255,255,.15) inset, 0 0 0 1px rgba(0,0,0,.4); }
-
-    /* Move targets */
-    .move-dot{ position:absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--good); box-shadow: 0 2px 10px rgba(51,209,122,.55); transform: translate(-50%, -50%); cursor: pointer; outline: 2px solid rgba(255,255,255,.12); }
-
-    /* Panels */
-    .panel{ background: var(--panel); padding: 16px; border-radius: 14px; box-shadow: var(--shadow); display:flex; flex-direction:column; gap:14px; }
-    .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
-    .muted{ color: var(--muted); font-size: 13px }
-
-    .btn{ appearance:none; border:1px solid rgba(255,255,255,.08); color:var(--ink); background: linear-gradient(180deg, #1c2140, #141939); padding:10px 14px; border-radius:12px; cursor:pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25); font-weight:600; letter-spacing:.3px; }
-    .btn:hover{ border-color: rgba(255,255,255,.18) }
-    .btn.primary{ background: linear-gradient(180deg, #2b4b97, #1a2e62); border-color: rgba(122,162,255,.45) }
-    .btn.warn{ background: linear-gradient(180deg, #6b1f2a, #3b0f15); border-color: rgba(255,107,107,.45) }
-
-    .seg{ display:inline-grid; grid-auto-flow:column; gap:6px; background:#0f1327; padding:6px; border-radius:12px; border:1px solid rgba(255,255,255,.06) }
-    .seg button{ background:transparent; border:none; color:var(--muted); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700 }
-    .seg button.active{ background: #24305b; color:var(--ink); outline:1px solid rgba(255,255,255,.12) }
-
-    .legend{ display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center }
-    .badge{ display:inline-flex; align-items:center; gap:8px; background:#0f1327; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.06) }
-    .dot{ width:14px; height:14px; border-radius:50% }
-    .dot.p0{ background: radial-gradient(circle at 30% 25%, #9bc0ff, #5c86ff)}
-    .dot.p1{ background: radial-gradient(circle at 30% 25%, #ffd59a, #ff9b40)}
-
-    footer{ color: var(--muted); text-align:center; padding: 8px 0 18px }
-
-    @media (max-width: 980px){ main{ grid-template-columns: 1fr; justify-items:center } #board{ order:1 } .panel{ order:2; width:min(700px, 100%) } }
+    html,body{height:100%;background:radial-gradient(1200px 800px at 10% -10%, #1a1f39 0%, var(--bg) 70%);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;margin:0}
+    .app{display:grid;grid-template-rows:auto 1fr;min-height:100dvh}
+    header{display:flex;align-items:center;gap:12px;padding:14px clamp(12px,3vw,24px);background:linear-gradient(180deg,#191d31 0%,#15192c 100%);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:10}
+    header h1{font-size:18px;margin:0}.spacer{flex:1}
+    main{display:grid;grid-template-columns:minmax(300px,1fr) auto minmax(260px,420px);gap:clamp(12px,3.5vw,28px);padding:clamp(12px,3.5vw,28px);align-items:start}
+    #board{display:grid;grid-template-columns:repeat(8, var(--cell) var(--gap)) var(--cell);grid-template-rows:repeat(8, var(--cell) var(--gap)) var(--cell);background:linear-gradient(180deg,#101322,#12162a);border-radius:var(--board-radius);padding:14px;box-shadow:var(--shadow);position:relative;user-select:none}
+    .cell{width:var(--cell);height:var(--cell);background:linear-gradient(180deg,#2a2f52,#212542);border-radius:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);position:relative}
+    .pawn{width:56%;height:56%;border-radius:50%;position:absolute;inset:0;margin:auto;box-shadow:0 6px 16px rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,255,255,.15)}
+    .p0{background:radial-gradient(circle at 30% 25%, #9bc0ff,#5c86ff)}.p1{background:radial-gradient(circle at 30% 25%, #ffd59a,#ff9b40)}
+    .wall{position:absolute;background:linear-gradient(180deg,#84521a,#5a3511);border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.08)}
+    .wall.v{width:var(--gap);height:calc(var(--cell)*2 + var(--gap))}
+    .wall.h{height:var(--gap);width:calc(var(--cell)*2 + var(--gap))}
+    .ghost{position:absolute;pointer-events:none;opacity:.85}
+    .ghost.valid{background:linear-gradient(180deg,rgba(51,209,122,.85),rgba(38,160,90,.85));box-shadow:0 0 0 2px rgba(255,255,255,.15) inset,0 0 0 1px rgba(0,0,0,.4)}
+    .ghost.invalid{background:linear-gradient(180deg,rgba(255,107,107,.85),rgba(206,67,67,.85));box-shadow:0 0 0 2px rgba(255,255,255,.15) inset,0 0 0 1px rgba(0,0,0,.4)}
+    .move-dot{position:absolute;width:18px;height:18px;border-radius:50%;background:var(--good);box-shadow:0 2px 10px rgba(51,209,122,.55);transform:translate(-50%,-50%);cursor:pointer;outline:2px solid rgba(255,255,255,.12)}
+    .panel{background:var(--panel);padding:16px;border-radius:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.muted{color:var(--muted);font-size:13px}
+    .btn{appearance:none;border:1px solid rgba(255,255,255,.08);color:var(--ink);background:linear-gradient(180deg,#1c2140,#141939);padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25);font-weight:600}
+    .seg{display:inline-grid;grid-auto-flow:column;gap:6px;background:#0f1327;padding:6px;border-radius:12px;border:1px solid rgba(255,255,255,.06)}
+    .seg button{background:transparent;border:none;color:var(--muted);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+    .seg button.active{background:#24305b;color:var(--ink);outline:1px solid rgba(255,255,255,.12)}
+    .badge{display:inline-flex;align-items:center;gap:8px;background:#0f1327;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.06)}
+    .dot{width:14px;height:14px;border-radius:50%}.dot.p0{background:radial-gradient(circle at 30% 25%,#9bc0ff,#5c86ff)}.dot.p1{background:radial-gradient(circle at 30% 25%,#ffd59a,#ff9b40)}
+    footer{color:var(--muted);text-align:center;padding:8px 0 18px}
+    @media (max-width:980px){main{grid-template-columns:1fr;justify-items:center}#board{order:1}.panel{order:2;width:min(700px,100%)}}
   </style>
 </head>
 <body>
@@ -87,28 +43,27 @@
       <h1>Quoridor</h1>
       <div class="spacer"></div>
       <div class="seg" role="tablist" aria-label="Tool selector">
-        <button id="tool-move" class="active" title="M キー">Move</button>
-        <button id="tool-wall-h" title="H キー">Wall ⟂</button>
-        <button id="tool-wall-v" title="V キー">Wall ∥</button>
+        <button id="tool-move" class="active" title="M">Move</button>
+        <button id="tool-wall-h" title="H">Wall ⟂</button>
+        <button id="tool-wall-v" title="V">Wall ∥</button>
       </div>
-      <button id="btn-undo" class="btn" title="U キー">Undo</button>
-      <button id="btn-new"  class="btn" title="N キー">New Game</button>
+      <button id="btn-undo" class="btn" title="U">Undo</button>
+      <button id="btn-new" class="btn" title="N">New Game</button>
     </header>
 
     <main>
-      <!-- Left panel -->
       <div class="panel" style="justify-self:center">
         <div class="row">
-          <div class="badge"><span class="dot p0"></span> P1 Walls: <strong id="p0-walls" style="margin-left:6px">10</strong></div>
-          <div class="badge"><span class="dot p1"></span> P2 Walls: <strong id="p1-walls" style="margin-left:6px">10</strong></div>
+          <div class="badge"><span class="dot p0"></span> P1 Walls: <strong id="p0-walls">10</strong></div>
+          <div class="badge"><span class="dot p1"></span> P2 Walls: <strong id="p1-walls">10</strong></div>
         </div>
         <div class="row">
-          <div class="badge">Turn: <strong id="turn-label" style="margin-left:6px">P1</strong></div>
-          <label class="badge" style="cursor:pointer"><input id="chk-hints" type="checkbox" style="margin-right:8px"/> Show move hints</label>
-          <label class="badge" style="cursor:pointer"><input id="chk-paths" type="checkbox" style="margin-right:8px"/> Show shortest paths</label>
+          <div class="badge">Turn: <strong id="turn-label">P1</strong></div>
+          <label class="badge" style="cursor:pointer"><input id="chk-hints" type="checkbox" /> Show move hints</label>
+          <label class="badge" style="cursor:pointer"><input id="chk-paths" type="checkbox" /> Show shortest paths</label>
         </div>
         <div class="row">
-          <label class="badge" style="cursor:pointer"><input id="chk-ai" type="checkbox" style="margin-right:8px"/> vs AI (P2)</label>
+          <label class="badge" style="cursor:pointer"><input id="chk-ai" type="checkbox"/> vs AI (P2)</label>
           <div class="seg" id="ai-diff">
             <button data-diff="easy">Easy</button>
             <button data-diff="med" class="active">Med</button>
@@ -116,556 +71,265 @@
           </div>
         </div>
         <div class="row">
-          <label class="badge" style="cursor:pointer"><input id="chk-diag" type="checkbox" style="margin-right:8px"/> Diagonal start (P1:↖ / P2:↘)</label>
+          <label class="badge" style="cursor:pointer"><input id="chk-diag" type="checkbox"/> Diagonal start (P1:↖ / P2:↘)</label>
         </div>
-        <div class="legend">
-          <div class="muted">操作:</div>
-          <div class="muted">駒を動かす場合は <strong>Move</strong> を選択し、緑の点をクリック。壁は <strong>Wall</strong> を選んで設置します（R で向き切替）。壁で両者の到達経路を完全に塞ぐことはできません。</div>
-          <div class="muted">ショートカット:</div>
-          <div class="muted">M/H/V = ツール, R = 壁の回転, U = Undo, N = New</div>
+        <div class="row">
+          <button id="btn-export" class="btn">Export KIFU (.txt)</button>
+          <button id="btn-import" class="btn">Import KIFU (.txt)</button>
+          <input id="file-import" type="file" accept="text/plain" style="display:none" />
         </div>
+        <div class="row" style="gap:6px">
+          <textarea id="kifu-text" placeholder="棋譜テキスト表示/貼り付け" rows="6" style="width:100%;background:#0f1327;color:var(--ink);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px"></textarea>
+          <div class="row">
+  <button id="btn-replay" class="btn">Replay</button>
+  <button id="btn-replay-step" class="btn">Step ▶︎</button>
+  <button id="btn-replay-stop" class="btn">Stop</button>
+  <label class="badge">Speed
+    <select id="replay-speed" style="margin-left:6px;background:#0f1327;color:var(--ink);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:4px 6px">
+      <option value="800">Slow</option>
+      <option value="400" selected>Normal</option>
+      <option value="150">Fast</option>
+    </select>
+  </label>
+</div>
+        </div>
+        <div class="muted">Notation: <code>n P1 M x,y</code> for move, <code>n P2 W h x,y</code> for wall. Header lines start with <code>#</code>.</div>
       </div>
 
-      <!-- Board -->
       <div id="board" aria-label="Quoridor board" role="application"></div>
 
-      <!-- Right panel -->
       <div class="panel">
-        <div style="font-weight:700">How to Deploy on GitHub Pages</div>
+        <div style="font-weight:700">GitHub Pages</div>
         <ol class="muted" style="margin:0 0 8px 18px; line-height:1.6">
-          <li>Create a repo (e.g. <code>quoridor</code>) and add this single <code>index.html</code>.</li>
-          <li>Commit &amp; push to <code>main</code> (or any branch).</li>
-          <li>Open <em>Settings → Pages</em>, select the branch and <em>root</em> folder, then save.</li>
-          <li>Your game will be live at <code>https://&lt;yourname&gt;.github.io/&lt;repo&gt;/</code>.</li>
+          <li>Create repo and add this <code>index.html</code>.</li>
+          <li>Settings → Pages → Deploy from branch (main / root).</li>
+          <li>Open the published URL.</li>
         </ol>
-        <div class="muted">（git.io は短縮 URL。必要なら GitHub Pages の URL を短縮して使えます）</div>
-        <hr style="border:none; border-top:1px solid rgba(255,255,255,.08)">
-        <div class="muted">Rules implemented: standard movement, jumps &amp; diagonal steps around a blocked opponent, wall placement with crossing/overlap checks, and path-existence validation (BFS). 2P local play. Optional AI (P2) with Easy/Med/Hard.</div>
+        <div class="muted">Rules: standard movement, jumps/diagonals around blocks, walls cannot cross/overlap/half-overlap; path-existence validated by BFS. AI (P2) Easy/Med/Hard.</div>
       </div>
     </main>
 
-    <footer>© 2025 Quoridor (browser edition). No backend required.</footer>
+    <footer>© 2025 Quoridor (browser edition)</footer>
   </div>
 
   <script>
-  // --- Utilities -----------------------------------------------------------
-  const BOARD_N = 9;                 // 9x9 cells
-  const WALLS_PER_PLAYER = 10;       // standard rules
+  // -------------------- Core Setup --------------------
+  const BOARD_N = 9; const WALLS_PER_PLAYER = 10;
+  const key = (x,y)=>`${x},${y}`; const parseKey = s => s.split(',').map(Number);
+  const $ = s=>document.querySelector(s); const el=(t,p={})=>Object.assign(document.createElement(t),p);
 
-  const key = (x,y) => `${x},${y}`;
-  const parseKey = s => s.split(',').map(Number);
-
-  // DOM helpers
-  const $ = sel => document.querySelector(sel);
-  const el = (tag, props={}) => Object.assign(document.createElement(tag), props);
-
-  // --- Game State ---------------------------------------------------------
   const state = {
-    players:[
-      { id:0, pos:{x:4,y:0}, goalY:8, walls:WALLS_PER_PLAYER },
-      { id:1, pos:{x:4,y:8}, goalY:0, walls:WALLS_PER_PLAYER },
-    ],
-    turn: 0, // 0 or 1
-    hWalls: new Set(), // horizontal wall top-left (x,y), 0..7
-    vWalls: new Set(), // vertical wall top-left (x,y), 0..7
-    history: [],       // for undo
-    tool: 'move',      // 'move' | 'wall-h' | 'wall-v'
+    players:[ {id:0,pos:{x:4,y:0},goalY:8,walls:WALLS_PER_PLAYER}, {id:1,pos:{x:4,y:8},goalY:0,walls:WALLS_PER_PLAYER} ],
+    turn:0, hWalls:new Set(), vWalls:new Set(), history:[], tool:'move',
+    kifu:[], kifuMeta:{mode:'standard'}
   };
+  const ai = { enabled:false, side:1, diff:'med' }; let aiThinking=false; const board = $('#board');let isReplaying=false; let replayTimer=null; let replayActions=[]; let replayIndex=0;
+  function isValidWallSlot(x,y){ return Number.isInteger(x)&&Number.isInteger(y)&&x>=0&&x<=7&&y>=0&&y<=7; }
 
-  // --- AI Settings --------------------------------------------------------
-  const ai = { enabled:false, side:1, diff:'med' };
-  let aiThinking = false;
+  // -------------------- Board --------------------
+  function buildCells(){ board.innerHTML=''; for(let y=0;y<BOARD_N;y++){ for(let x=0;x<BOARD_N;x++){ const c=el('div',{className:'cell'}); c.dataset.x=String(x); c.dataset.y=String(y); c.style.gridColumn=(1+x*2)+' / span 1'; c.style.gridRow=(1+y*2)+' / span 1'; c.addEventListener('click',()=>onCellClick(x,y)); board.appendChild(c);} } }
+  const hasHorizontalWall=(x,y)=>state.hWalls.has(key(x,y));
+  const hasVerticalWall=(x,y)=>state.vWalls.has(key(x,y));
+  function blockedLR(x,y){ return hasVerticalWall(x,y)||hasVerticalWall(x,y-1); }
+  function blockedUD(x,y){ return hasHorizontalWall(x,y)||hasHorizontalWall(x-1,y); }
 
-  // --- Board Construction -------------------------------------------------
-  const board = $('#board');
-
-  function buildCells(){
-    board.innerHTML = '';
-    for(let y=0; y<BOARD_N; y++){
-      for(let x=0; x<BOARD_N; x++){
-        const c = el('div', { className:'cell' });
-        c.dataset.x = String(x);
-        c.dataset.y = String(y);
-        c.style.gridColumn = (1 + x*2) + ' / span 1';
-        c.style.gridRow    = (1 + y*2) + ' / span 1';
-        c.addEventListener('click', () => onCellClick(x,y));
-        board.appendChild(c);
-      }
+  function canPlaceWall(orient,x,y){
+    if(!isValidWallSlot(x,y)) return false;
+    if(state.players[state.turn].walls<=0) return false;
+    if(orient==='h'){
+      if(hasHorizontalWall(x,y)) return false; // same
+      if(hasHorizontalWall(x-1,y) || hasHorizontalWall(x+1,y)) return false; // half-overlap
+      if(hasVerticalWall(x,y)) return false; // crossing
+    } else {
+      if(hasVerticalWall(x,y)) return false;
+      if(hasVerticalWall(x,y-1) || hasVerticalWall(x,y+1)) return false; // half-overlap
+      if(hasHorizontalWall(x,y)) return false; // crossing
     }
+    const snap=snapshot(); (orient==='h'?state.hWalls:state.vWalls).add(key(x,y)); const ok=playersHavePaths(); restore(snap); return ok;
   }
 
-  // --- Walls Geometry & Queries ------------------------------------------
-  function hasHorizontalWall(x,y){ return state.hWalls.has(key(x,y)); }
-  function hasVerticalWall(x,y){ return state.vWalls.has(key(x,y)); }
+  function neighborsFrom(x,y){ const n=[]; if(x>0&&!blockedLR(x-1,y)) n.push({x:x-1,y}); if(x<BOARD_N-1&&!blockedLR(x,y)) n.push({x:x+1,y}); if(y>0&&!blockedUD(x,y-1)) n.push({x,y:y-1}); if(y<BOARD_N-1&&!blockedUD(x,y)) n.push({x,y:y+1}); return n; }
 
-  // Is movement blocked between (x,y) and (x+1,y) ? (right/left)
-  function blockedLR(x,y){
-    return hasVerticalWall(x, y) || hasVerticalWall(x, y-1);
-  }
-  // Is movement blocked between (x,y) and (x,y+1)? (down/up)
-  function blockedUD(x,y){
-    return hasHorizontalWall(x, y) || hasHorizontalWall(x-1, y);
-  }
+  function legalMoves(pid){ const me=state.players[pid], other=state.players[1-pid]; const moves=[]; const adj=neighborsFrom(me.pos.x,me.pos.y); const oppAdj=adj.find(p=>p.x===other.pos.x&&p.y===other.pos.y); if(oppAdj){ const dx=other.pos.x-me.pos.x, dy=other.pos.y-me.pos.y; const bx=other.pos.x+Math.sign(dx), by=other.pos.y+Math.sign(dy); const inB=bx>=0&&bx<BOARD_N&&by>=0&&by<BOARD_N; let straightBlocked=true; if(dx!==0){ if(inB && !blockedLR(Math.min(other.pos.x,bx), other.pos.y)){ straightBlocked=false; moves.push({x:bx,y:by}); } } else if(dy!==0){ if(inB && !blockedUD(other.pos.x, Math.min(other.pos.y,by))){ straightBlocked=false; moves.push({x:bx,y:by}); } } if(straightBlocked){ if(dx!==0){ const c1={x:other.pos.x,y:other.pos.y-1}, c2={x:other.pos.x,y:other.pos.y+1}; if(c1.y>=0 && !blockedUD(other.pos.x,c1.y)) moves.push(c1); if(c2.y<BOARD_N && !blockedUD(other.pos.x,other.pos.y)) moves.push(c2); } else { const c1={x:other.pos.x-1,y:other.pos.y}, c2={x:other.pos.x+1,y:other.pos.y}; if(c1.x>=0 && !blockedLR(c1.x,other.pos.y)) moves.push(c1); if(c2.x<BOARD_N && !blockedLR(other.pos.x,other.pos.y)) moves.push(c2); } } }
+    for(const p of adj){ if(!(p.x===other.pos.x&&p.y===other.pos.y)) moves.push(p); } const seen=new Set(); return moves.filter(m=>{ const k=key(m.x,m.y); if(seen.has(k)) return false; seen.add(k); return true; }); }
 
-  // Validate placing a wall of orientation 'h'/'v' at (x,y) [0..7]
-function canPlaceWall(orient, x, y){
-  // 盤外チェック（壁スロットは 0..7）
-  if (x < 0 || y < 0 || x > 7 || y > 7) return false;
+  function playersHavePaths(){ return [0,1].every(id=>hasPathToGoal(id)); }
+  function hasPathToGoal(pid){ const start=state.players[pid].pos, goalY=state.players[pid].goalY; const Q=[start]; const seen=new Set([key(start.x,start.y)]); while(Q.length){ const p=Q.shift(); if(p.y===goalY) return true; for(const n of neighborsFrom(p.x,p.y)){ const k=key(n.x,n.y); if(!seen.has(k)){ seen.add(k); Q.push(n);} } } return false; }
+  function shortestPath(pid){ const start=state.players[pid].pos, goalY=state.players[pid].goalY; const Q=[start]; const seen=new Set([key(start.x,start.y)]); const prev=new Map(); while(Q.length){ const p=Q.shift(); if(p.y===goalY){ const path=[p]; let k=key(p.x,p.y); while(prev.has(k)){ const v=prev.get(k); path.push(v); k=key(v.x,v.y);} return path.reverse(); } for(const n of neighborsFrom(p.x,p.y)){ const nk=key(n.x,n.y); if(!seen.has(nk)){ seen.add(nk); prev.set(nk,p); Q.push(n);} } } return []; }
 
-  // 壁残数
-  if (state.players[state.turn].walls <= 0) return false;
+  function clearDynamic(){ [...board.querySelectorAll('.wall,.pawn,.move-dot,.ghost')].forEach(n=>n.remove()); }
+  function placeWallNode(orient,x,y,cls='wall'){ if(!isValidWallSlot(x,y)) return null; const node=el('div',{className:cls+' '+(orient==='h'?'h':'v')}); const pad=14; const cell=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell')); const gap=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')); if(orient==='h'){ const col=pad + (x*(cell+gap)); const row=pad + (y*(cell+gap)) + cell; node.style.left=col+'px'; node.style.top=row+'px'; } else { const col=pad + (x*(cell+gap)) + cell; const row=pad + (y*(cell+gap)); node.style.left=col+'px'; node.style.top=row+'px'; } board.appendChild(node); return node; }
+  function renderWalls(){ for(const s of state.hWalls){ const [x,y]=parseKey(s); if(isValidWallSlot(x,y)) placeWallNode('h',x,y);} for(const s of state.vWalls){ const [x,y]=parseKey(s); if(isValidWallSlot(x,y)) placeWallNode('v',x,y);} }
+  function renderPawns(){ for(const p of state.players){ const c=board.querySelector(`.cell[data-x="${p.pos.x}"][data-y="${p.pos.y}"]`); if(c){ c.appendChild(el('div',{className:'pawn p'+p.id,title:'P'+(p.id+1)})); } } }
+  function renderMoveHints(){ if(!$('#chk-hints').checked || state.tool!=='move') return; const me=state.players[state.turn]; for(const m of legalMoves(state.turn)){ const cellEl=board.querySelector(`.cell[data-x="${m.x}"][data-y="${m.y}"]`); const dot=el('div',{className:'move-dot'}); const r=cellEl.getBoundingClientRect(), rb=board.getBoundingClientRect(); dot.style.left=(r.left-rb.left+r.width/2)+'px'; dot.style.top=(r.top-rb.top+r.height/2)+'px'; dot.addEventListener('click',()=>movePawnTo(me.id,m.x,m.y)); board.appendChild(dot);} }
+  function renderPaths(){ if(!$('#chk-paths').checked) return; const paths=[shortestPath(0),shortestPath(1)]; for(let pid=0;pid<2;pid++){ for(const step of paths[pid]){ const c=board.querySelector(`.cell[data-x="${step.x}"][data-y="${step.y}"]`); if(c){ c.style.outline=`2px dashed ${pid===0?'rgba(122,162,255,.7)':'rgba(255,180,84,.8)'}`; c.style.outlineOffset='-2px'; } } } }
+  function resetCellOutlines(){ for(const c of board.querySelectorAll('.cell')) c.style.outline='none'; }
+  function renderInfo(){ $('#p0-walls').textContent=state.players[0].walls; $('#p1-walls').textContent=state.players[1].walls; $('#turn-label').textContent=state.turn===0?'P1':'P2'; }
+  function renderAll(){ clearDynamic(); renderWalls(); renderPawns(); resetCellOutlines(); renderMoveHints(); renderPaths(); renderInfo(); $('#kifu-text').value = exportKifuString(); }
 
-  if (orient === 'h') {
-    // 同じスロット重複
-    if (hasHorizontalWall(x, y)) return false;
-
-    // ★半重なり防止：同向きの隣接スロットに壁があるなら不可（x±1, y）
-    if (hasHorizontalWall(x - 1, y) || hasHorizontalWall(x + 1, y)) return false;
-
-    // 交差（中央十字での交差は禁止）
-    if (hasVerticalWall(x, y)) return false;
-  } else { // 'v'
-    if (hasVerticalWall(x, y)) return false;
-
-    // ★半重なり防止：同向きの隣接スロットに壁があるなら不可（x, y±1）
-    if (hasVerticalWall(x, y - 1) || hasVerticalWall(x, y + 1)) return false;
-
-    // 交差禁止
-    if (hasHorizontalWall(x, y)) return false;
-  }
-
-  // 置いた結果、両者にゴールへの経路が残ることを確認（BFS）
-  const snap = snapshot();
-  if (orient === 'h') state.hWalls.add(key(x, y)); else state.vWalls.add(key(x, y));
-  const ok = playersHavePaths();
-  restore(snap);
-  return ok;
+  // -------------------- Interaction & Turn --------------------
+  function onCellClick(x,y){ if(state.tool!=='move') return; const me=state.players[state.turn]; const moves=legalMoves(state.turn); if(moves.some(m=>m.x===x&&m.y===y)) movePawnTo(me.id,x,y); }
+  let recordKifu=true;
+function commit(action, kifuEntry){
+  state.history.push(snapshot());
+  action();
+  if (recordKifu && kifuEntry) state.kifu.push(kifuEntry);
+  renderAll();
+  const won = checkWin();
+  // 再生中は AI を動かさない
+  if (!won && !isReplaying) setTimeout(maybeAIMove, 120);
 }
 
+  function movePawnTo(pid,x,y){ commit(()=>{ state.players[pid].pos={x,y}; state.turn=1-state.turn; }, `${Math.ceil((state.kifu.length+1)/2)} P${pid+1} M ${x},${y}`); }
+  let ghost=null; function updateGhost(orient,x,y){ if(ghost) ghost.remove(); if(x==null||y==null) return; const ok=canPlaceWall(orient,x,y); ghost=placeWallNode(orient,x,y,'ghost '+(ok?'valid':'invalid')); }
+  function placeWall(orient,x,y){ if(!isValidWallSlot(x,y) || !canPlaceWall(orient,x,y)) return; const pid=state.turn; commit(()=>{ (orient==='h'?state.hWalls:state.vWalls).add(key(x,y)); state.players[state.turn].walls--; state.turn=1-state.turn; }, `${Math.ceil((state.kifu.length+1)/2)} P${pid+1} W ${orient} ${x},${y}`); }
 
-  // --- Movement -----------------------------------------------------------
-  function neighborsFrom(x,y){
-    const n=[];
-    if(x>0 && !blockedLR(x-1,y)) n.push({x:x-1,y});
-    if(x<BOARD_N-1 && !blockedLR(x,y)) n.push({x:x+1,y});
-    if(y>0 && !blockedUD(x,y-1)) n.push({x,y:y-1});
-    if(y<BOARD_N-1 && !blockedUD(x,y)) n.push({x,y:y+1});
-    return n;
-  }
+  function wallSlotFromPointer(evt,orient){ const pad=14; const cell=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell')); const gap=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')); const r=board.getBoundingClientRect(); const px=evt.clientX-r.left-pad; const py=evt.clientY-r.top-pad; if(px<0||py<0) return {x:null,y:null}; const tile=cell+gap; const tx=Math.floor(px/tile); const ty=Math.floor(py/tile); if(tx<0||tx>8||ty<0||ty>8) return {x:null,y:null}; if(orient==='h'){ const within=(py%tile)>=cell && (py%tile)<tile; if(!within||tx>=8||ty>=8) return {x:null,y:null}; return {x:tx,y:ty}; } else { const within=(px%tile)>=cell && (px%tile)<tile; if(!within||tx>=8||ty>=8) return {x:null,y:null}; return {x:tx,y:ty}; } }
+  board.addEventListener('mousemove',e=>{ const t=state.tool; if(t==='move'){ if(ghost){ghost.remove();ghost=null;} return;} const o=t==='wall-h'?'h':'v'; const {x,y}=wallSlotFromPointer(e,o); updateGhost(o,x,y); });
+  board.addEventListener('mouseleave',()=>{ if(ghost){ghost.remove();ghost=null;} });
+  board.addEventListener('click',e=>{ const t=state.tool; if(t==='move') return; const o=t==='wall-h'?'h':'v'; const {x,y}=wallSlotFromPointer(e,o); if(x!=null) placeWall(o,x,y); });
 
-  function legalMoves(pid){
-    const me = state.players[pid];
-    const other = state.players[1-pid];
-    const moves = [];
+  function checkWin(){ for(const p of state.players){ if(p.pos.y===p.goalY){ alert(`Player ${p.id+1} wins!`); state.tool='move'; toggleToolButtons(); board.style.pointerEvents='none'; return true; } } return false; }
 
-    const adj = neighborsFrom(me.pos.x, me.pos.y);
-    const oppAdj = adj.find(p => p.x===other.pos.x && p.y===other.pos.y);
-    if(oppAdj){
-      const dx = other.pos.x - me.pos.x;
-      const dy = other.pos.y - me.pos.y;
-      const bx = other.pos.x + Math.sign(dx);
-      const by = other.pos.y + Math.sign(dy);
-      const inBoard = bx>=0 && bx<BOARD_N && by>=0 && by<BOARD_N;
-      let straightBlocked = true;
-      if(dx!==0){
-        if(inBoard && !blockedLR(Math.min(other.pos.x, bx), other.pos.y)){
-          straightBlocked = false;
-          moves.push({x:bx, y:by});
-        }
-      } else if(dy!==0){
-        if(inBoard && !blockedUD(other.pos.x, Math.min(other.pos.y, by))){
-          straightBlocked = false;
-          moves.push({x:bx, y:by});
-        }
-      }
-      if(straightBlocked){
-        if(dx!==0){
-          const cand1 = {x: other.pos.x, y: other.pos.y-1};
-          const cand2 = {x: other.pos.x, y: other.pos.y+1};
-          if(cand1.y>=0 && !blockedUD(other.pos.x, cand1.y)) moves.push(cand1);
-          if(cand2.y<BOARD_N && !blockedUD(other.pos.x, other.pos.y)) moves.push(cand2);
-        } else {
-          const cand1 = {x: other.pos.x-1, y: other.pos.y};
-          const cand2 = {x: other.pos.x+1, y: other.pos.y};
-          if(cand1.x>=0 && !blockedLR(cand1.x, other.pos.y)) moves.push(cand1);
-          if(cand2.x<BOARD_N && !blockedLR(other.pos.x, other.pos.y)) moves.push(cand2);
-        }
-      }
+  function snapshot(){ return JSON.stringify({ players:state.players.map(p=>({id:p.id,pos:{...p.pos},goalY:p.goalY,walls:p.walls})), turn:state.turn, hWalls:[...state.hWalls], vWalls:[...state.vWalls], kifu:[...state.kifu], kifuMeta:{...state.kifuMeta} }); }
+  function restore(json){ const s=JSON.parse(json); state.players.forEach((p,i)=>{ p.pos=s.players[i].pos; p.goalY=s.players[i].goalY; p.walls=s.players[i].walls;}); state.turn=s.turn; state.hWalls=new Set(s.hWalls); state.vWalls=new Set(s.vWalls); state.kifu=[...s.kifu]; state.kifuMeta={...s.kifuMeta}; }
+  function undo(){ const snap=state.history.pop(); if(!snap) return; restore(snap); renderAll(); board.style.pointerEvents='auto'; }
+
+  function toggleToolButtons(){ $('#tool-move').classList.toggle('active',state.tool==='move'); $('#tool-wall-h').classList.toggle('active',state.tool==='wall-h'); $('#tool-wall-v').classList.toggle('active',state.tool==='wall-v'); }
+  $('#tool-move').addEventListener('click',()=>{ state.tool='move'; toggleToolButtons(); renderAll(); });
+  $('#tool-wall-h').addEventListener('click',()=>{ state.tool='wall-h'; toggleToolButtons(); });
+  $('#tool-wall-v').addEventListener('click',()=>{ state.tool='wall-v'; toggleToolButtons(); });
+  $('#btn-undo').addEventListener('click',undo);
+  $('#btn-new').addEventListener('click',()=>{ newGame(); });
+  const chkAI=$('#chk-ai'); if(chkAI){ chkAI.addEventListener('change',e=>{ ai.enabled=e.target.checked; maybeAIMove(); }); }
+  const segAI=$('#ai-diff'); if(segAI){ segAI.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; ai.diff=b.dataset.diff; [...segAI.querySelectorAll('button')].forEach(x=>x.classList.toggle('active',x.dataset.diff===ai.diff)); }); }
+  const chkDiag=$('#chk-diag'); if(chkDiag){ chkDiag.addEventListener('change',()=>{ newGame(); }); }
+
+  // -------------------- AI --------------------
+  function pathLen(pid){ const p=shortestPath(pid); return (p&&p.length)?(p.length-1):999; }
+  function wallCandidatesFor(pid){ const opp=1-pid; const path=shortestPath(opp)||[]; const cand=new Set(); const list=[]; function push(orient,x,y){ if(x==null||y==null) return; if(!isValidWallSlot(x,y)) return; if(orient==='h'){ if(hasHorizontalWall(x,y)||hasHorizontalWall(x-1,y)||hasHorizontalWall(x+1,y)||hasVerticalWall(x,y)) return; } else { if(hasVerticalWall(x,y)||hasVerticalWall(x,y-1)||hasVerticalWall(x,y+1)||hasHorizontalWall(x,y)) return; } if(!canPlaceWall(orient,x,y)) return; const k=orient+':'+x+','+y; if(!cand.has(k)){ cand.add(k); list.push({type:'wall',orient,x,y}); } } for(let i=0;i<path.length-1;i++){ const a=path[i],b=path[i+1]; if(a.x!==b.x){ const x=Math.min(a.x,b.x), y=a.y; push('v',x,y); push('v',x,y-1);} else { const x=a.x, y=Math.min(a.y,b.y); push('h',x,y); push('h',x-1,y);} } return list; }
+  function evaluate(){ const me=ai.side, other=1-me; if(state.players[me].pos.y===state.players[me].goalY) return 10000; if(state.players[other].pos.y===state.players[other].goalY) return -10000; const myD=pathLen(me), opD=pathLen(other); const w=(state.players[me].walls - state.players[other].walls); return (opD-myD)*10 + w; }
+  function simulate(action,fn){ if(action.type==='wall'){ if(!isValidWallSlot(action.x,action.y) || !canPlaceWall(action.orient,action.x,action.y)) return -1e9; } const snap=snapshot(); if(action.type==='move'){ const pid=state.turn; state.players[pid].pos={x:action.x,y:action.y}; state.turn=1-state.turn; } else { (action.orient==='h'?state.hWalls:state.vWalls).add(key(action.x,action.y)); state.players[state.turn].walls--; state.turn=1-state.turn; } const val=fn(); restore(snap); return val; }
+  function generateActions(pid,limitWalls=8){ const actions=legalMoves(pid).map(m=>({type:'move',x:m.x,y:m.y})); if(state.players[pid].walls>0){ let cands=wallCandidatesFor(pid); cands.sort((A,B)=>{ const a=simulate({type:'wall',orient:A.orient,x:A.x,y:A.y},()=>evaluate()); const b=simulate({type:'wall',orient:B.orient,x:B.x,y:B.y},()=>evaluate()); return b-a;}); actions.push(...cands.slice(0,limitWalls)); } return actions; }
+  function minimax(depth,alpha,beta){ if(depth===0) return evaluate(); const pid=state.turn; const maximizing=(pid===ai.side); const acts=generateActions(pid,8); if(acts.length===0) return evaluate(); if(maximizing){ let best=-1e9; for(const a of acts){ const v=simulate(a,()=>minimax(depth-1,alpha,beta)); if(v>best) best=v; if(v>alpha) alpha=v; if(beta<=alpha) break; } return best; } else { let best=1e9; for(const a of acts){ const v=simulate(a,()=>minimax(depth-1,alpha,beta)); if(v<best) best=v; if(v<beta) beta=v; if(beta<=alpha) break; } return best; } }
+  function aiChoose(){ const pid=state.turn, diff=ai.diff; if(diff==='easy'){ const moves=legalMoves(pid); if(moves.length===0) return null; let best=moves[0], val=Infinity; for(const m of moves){ const v=simulate({type:'move',x:m.x,y:m.y},()=>pathLen(ai.side)); if(v<val){ val=v; best=m; } } return {type:'move',x:best.x,y:best.y}; }
+    if(diff==='med'){ let best=null,score=-1e9; const acts=generateActions(pid,8); for(const a of acts){ if(a.type==='wall' && (!isValidWallSlot(a.x,a.y)||!canPlaceWall(a.orient,a.x,a.y))) continue; const s=simulate(a,()=>evaluate()); if(s>score){ score=s; best=a; } } return best; }
+    let best=null,bestScore=-1e9; const acts=generateActions(pid,10); for(const a of acts){ if(a.type==='wall' && (!isValidWallSlot(a.x,a.y)||!canPlaceWall(a.orient,a.x,a.y))) continue; const s=simulate(a,()=>minimax(2,-1e9,1e9)); if(s>bestScore){ bestScore=s; best=a; } } return best; }
+  function maybeAIMove(){ if(!ai.enabled) return; if(state.turn!==ai.side){ board.style.pointerEvents='auto'; return;} if(checkWin()) return; if(aiThinking) return; aiThinking=true; board.style.pointerEvents='none'; setTimeout(()=>{ const act=aiChoose(); if(!act){ aiThinking=false; board.style.pointerEvents='auto'; return;} if(act.type==='move') movePawnTo(state.turn,act.x,act.y); else placeWall(act.orient,act.x,act.y); aiThinking=false; board.style.pointerEvents='auto'; },120); }
+
+  // -------------------- KIFU (Save/Load) --------------------
+  function exportKifuString(){ const lines=[]; lines.push('# Quoridor KIFU v1'); lines.push(`# mode:${state.kifuMeta.mode}`); lines.push(`# date:${new Date().toISOString()}`); for(const entry of state.kifu){ lines.push(entry); } return lines.join('\n'); }
+  function downloadKifu(){ const text=exportKifuString(); const blob=new Blob([text],{type:'text/plain'}); const a=el('a',{href:URL.createObjectURL(blob),download:`quoridor_kifu_${Date.now()}.txt`}); document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove(); }
+  function parseKifu(text){ const lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean); const header=lines.filter(l=>l.startsWith('#')); const body=lines.filter(l=>!l.startsWith('#'));
+    const modeLine=header.find(l=>l.toLowerCase().startsWith('# mode:'))||''; const mode=modeLine.split(':')[1]?.trim()||'standard';
+    // set mode checkbox
+    const diag=(mode==='diagonal'); if($('#chk-diag')) $('#chk-diag').checked=diag;
+    // fresh game by mode
+    newGame();
+    // apply moves one by one (without recording into kifu again)
+    recordKifu=false; state.kifu=[]; state.kifuMeta.mode=diag?'diagonal':'standard';
+    for(const l of body){ const m = l.match(/^(\d+)\s+P([12])\s+(M|W)\s+(?:([hv])\s+)?(\d),(\d)$/i); if(!m) throw new Error('Bad line: '+l);
+      const ply=parseInt(m[1],10); const p=parseInt(m[2],10)-1; const type=m[3].toUpperCase(); const orient=(m[4]||'').toLowerCase(); const x=parseInt(m[5],10), y=parseInt(m[6],10);
+      if(p!==state.turn) throw new Error(`Turn mismatch at line: ${l}`);
+      if(type==='M'){ const moves=legalMoves(state.turn); if(!moves.some(mm=>mm.x===x&&mm.y===y)) throw new Error('Illegal move: '+l); movePawnTo(p,x,y); }
+      else { if(orient!=='h' && orient!=='v') throw new Error('Wall orient missing: '+l); if(!canPlaceWall(orient,x,y)) throw new Error('Illegal wall: '+l); placeWall(orient,x,y); }
     }
-    for(const p of adj){ if(!(p.x===other.pos.x && p.y===other.pos.y)) moves.push(p); }
-    const seen = new Set();
-    return moves.filter(m=>{ const k=key(m.x,m.y); if(seen.has(k)) return false; seen.add(k); return true; });
+    recordKifu=true; renderAll();
   }
-
-  // --- Pathfinding to validate placements --------------------------------
-  function playersHavePaths(){ return [0,1].every(id => hasPathToGoal(id)); }
-
-  function hasPathToGoal(pid){
-    const start = state.players[pid].pos;
-    const goalY = state.players[pid].goalY;
-    const Q=[start];
-    const seen = new Set([key(start.x,start.y)]);
-    while(Q.length){
-      const p = Q.shift();
-      if(p.y === goalY) return true;
-      for(const n of neighborsFrom(p.x,p.y)){
-        const k = key(n.x,n.y);
-        if(!seen.has(k)){ seen.add(k); Q.push(n); }
-      }
-    }
-    return false;
+  $('#btn-export').addEventListener('click',()=>{ $('#kifu-text').value=exportKifuString(); downloadKifu(); });
+  $('#btn-import').addEventListener('click',()=>{ $('#file-import').click(); });
+$('#file-import').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const text = await f.text();
+  try {
+    // まずテキストエリアに反映
+    $('#kifu-text').value = text;
+    // 形式を事前チェック（不正ならここでエラー）
+    parseKifuToActions(text);
+  } catch (err) {
+    alert('Import error: ' + err.message);
+  } finally {
+    e.target.value = '';
   }
+});
 
-  function shortestPath(pid){
-    const start = state.players[pid].pos;
-    const goalY = state.players[pid].goalY;
-    const Q=[start];
-    const seen = new Set([key(start.x,start.y)]);
-    const prev = new Map();
-    while(Q.length){
-      const p=Q.shift();
-      if(p.y===goalY){
-        const path=[p];
-        let k=key(p.x,p.y);
-        while(prev.has(k)){ const v = prev.get(k); path.push(v); k = key(v.x,v.y); }
-        return path.reverse();
-      }
-      for(const n of neighborsFrom(p.x,p.y)){
-        const nk=key(n.x,n.y);
-        if(!seen.has(nk)) { seen.add(nk); prev.set(nk,p); Q.push(n); }
-      }
-    }
-    return [];
+// -------------------- Replay Controls --------------------
+function parseKifuToActions(text){
+  const lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const header=lines.filter(l=>l.startsWith('#'));
+  const body=lines.filter(l=>!l.startsWith('#'));
+  const modeLine=header.find(l=>l.toLowerCase().startsWith('# mode:'))||'';
+  const mode=(modeLine.split(':')[1]||'').trim()||'standard';
+  const actions=[];
+  for(const l of body){
+    const m=l.match(/^(\d+)\s+P([12])\s+(M|W)\s+(?:([hv])\s+)?(\d),(\d)$/i);
+    if(!m) throw new Error('Bad line: '+l);
+    const pid=parseInt(m[2],10)-1;
+    const type=m[3].toUpperCase();
+    const orient=(m[4]||'').toLowerCase();
+    const x=parseInt(m[5],10), y=parseInt(m[6],10);
+    actions.push(type==='M'?{type:'M',pid,x,y}:{type:'W',pid,orient,x,y});
   }
-
-  // --- Rendering ----------------------------------------------------------
-  function clearDynamicOverlays(){ [...board.querySelectorAll('.wall, .pawn, .move-dot, .ghost')].forEach(n=>n.remove()); }
-
-  function placeWallNode(orient, x, y, cls='wall'){
-    const node = el('div', { className: cls + ' ' + (orient==='h'?'h':'v') });
-    const pad = 14;
-    const cell = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell'));
-    const gap  = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
-    if(orient==='h'){
-      const colPx = pad + (x * (cell + gap));
-      const rowPx = pad + (y * (cell + gap)) + cell;
-      node.style.left = colPx + 'px';
-      node.style.top  = rowPx + 'px';
-    } else {
-      const colPx = pad + (x * (cell + gap)) + cell;
-      const rowPx = pad + (y * (cell + gap));
-      node.style.left = colPx + 'px';
-      node.style.top  = rowPx + 'px';
-    }
-    board.appendChild(node);
-    return node;
+  return {mode,actions};
+}
+function applyAction(act){
+  if(act.type==='M'){
+    const legal = legalMoves(state.turn);
+    if(!legal.some(mm=>mm.x===act.x && mm.y===act.y))
+      throw new Error(`Illegal move at replay: P${(state.turn+1)} M ${act.x},${act.y}`);
+    movePawnTo(state.turn, act.x, act.y);
+  } else {
+    if(!canPlaceWall(act.orient, act.x, act.y))
+      throw new Error(`Illegal wall at replay: P${(state.turn+1)} W ${act.orient} ${act.x},${act.y}`);
+    placeWall(act.orient, act.x, act.y);
   }
-
-  function renderWalls(){
-    for(const s of state.hWalls){ const [x,y] = parseKey(s); placeWallNode('h',x,y); }
-    for(const s of state.vWalls){ const [x,y] = parseKey(s); placeWallNode('v',x,y); }
-  }
-
-  function renderPawns(){
-    for(const p of state.players){
-      const {x,y} = p.pos;
-      const c = board.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
-      const pawn = el('div', { className: 'pawn p'+p.id, title: 'P'+(p.id+1) });
-      c.appendChild(pawn);
-    }
-  }
-
-  function renderMoveHints(){
-    if(!$('#chk-hints').checked || state.tool!=='move') return;
-    const me = state.players[state.turn];
-    for(const m of legalMoves(state.turn)){
-      const cellEl = board.querySelector(`.cell[data-x="${m.x}"][data-y="${m.y}"]`);
-      const dot = el('div', { className:'move-dot' });
-      const rect = cellEl.getBoundingClientRect();
-      const brect = board.getBoundingClientRect();
-      dot.style.left = (rect.left - brect.left + rect.width/2) + 'px';
-      dot.style.top  = (rect.top  - brect.top  + rect.height/2) + 'px';
-      dot.addEventListener('click', ()=> movePawnTo(me.id, m.x, m.y));
-      board.appendChild(dot);
-    }
-  }
-
-  function renderPaths(){
-    if(!$('#chk-paths').checked) return;
-    const paths = [shortestPath(0), shortestPath(1)];
-    for(let pid=0; pid<2; pid++){
-      const path = paths[pid];
-      for(const step of path){
-        const c = board.querySelector(`.cell[data-x="${step.x}"][data-y="${step.y}"]`);
-        if(!c) continue;
-        c.style.outline = `2px dashed ${pid===0? 'rgba(122,162,255,.7)':'rgba(255,180,84,.8)'}`;
-        c.style.outlineOffset = '-2px';
-      }
-    }
-  }
-
-  function resetCellOutlines(){ for(const c of board.querySelectorAll('.cell')) c.style.outline='none'; }
-
-  function renderInfo(){
-    $('#p0-walls').textContent = state.players[0].walls;
-    $('#p1-walls').textContent = state.players[1].walls;
-    $('#turn-label').textContent = state.turn===0? 'P1' : 'P2';
-  }
-
-  function renderAll(){
-    clearDynamicOverlays();
-    renderWalls();
-    renderPawns();
-    resetCellOutlines();
-    renderMoveHints();
-    renderPaths();
-    renderInfo();
-  }
-
-  // --- Interaction --------------------------------------------------------
-  function onCellClick(x,y){
-    if(state.tool !== 'move') return;
-    const me = state.players[state.turn];
-    const moves = legalMoves(state.turn);
-    if(moves.some(m=>m.x===x && m.y===y)) movePawnTo(me.id, x, y);
-  }
-
-  function commit(action){
-    state.history.push(snapshot());
-    action();
-    renderAll();
-    const won = checkWin();
-    if(!won) setTimeout(maybeAIMove, 120);
-  }
-
-  function movePawnTo(pid, x, y){
-    commit(()=>{ state.players[pid].pos = {x,y}; state.turn = 1 - state.turn; });
-  }
-
-  let ghost = null;
-  function updateGhost(orient, x, y){
-    if(ghost) ghost.remove();
-    if(x==null || y==null) return;
-    const ok = canPlaceWall(orient, x, y);
-    ghost = placeWallNode(orient, x, y, 'ghost ' + (ok?'valid':'invalid'));
-  }
-
-  function placeWall(orient, x, y){
-    if(!canPlaceWall(orient, x, y)) return;
-    commit(()=>{
-      (orient==='h' ? state.hWalls : state.vWalls).add(key(x,y));
-      state.players[state.turn].walls--;
-      state.turn = 1 - state.turn;
-    });
-  }
-
-  function wallSlotFromPointer(evt, orient){
-    const pad = 14; const cell = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell')); const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
-    const r = board.getBoundingClientRect();
-    const px = evt.clientX - r.left - pad;
-    const py = evt.clientY - r.top  - pad;
-    if(px<0||py<0) return {x:null,y:null};
-    const tile = cell + gap;
-    const tx = Math.floor(px / tile);
-    const ty = Math.floor(py / tile);
-    if(tx<0||tx>8||ty<0||ty>8) return {x:null,y:null};
-
-    if(orient==='h'){
-      const withinGapRow = (py % tile) >= cell && (py % tile) < tile;
-      if(!withinGapRow || tx>=8 || ty>=8) return {x:null,y:null};
-      return {x:tx, y:ty};
-    } else {
-      const withinGapCol = (px % tile) >= cell && (px % tile) < tile;
-      if(!withinGapCol || tx>=8 || ty>=8) return {x:null,y:null};
-      return {x:tx, y:ty};
-    }
-  }
-
-  board.addEventListener('mousemove', (e)=>{
-    const tool = state.tool;
-    if(tool==='move') { if(ghost) { ghost.remove(); ghost=null; } return; }
-    const orient = tool==='wall-h' ? 'h' : 'v';
-    const {x,y} = wallSlotFromPointer(e, orient);
-    updateGhost(orient, x, y);
-  });
-  board.addEventListener('mouseleave', ()=>{ if(ghost){ ghost.remove(); ghost=null; } });
-  board.addEventListener('click', (e)=>{
-    const tool = state.tool;
-    if(tool==='move') return;
-    const orient = tool==='wall-h' ? 'h' : 'v';
-    const {x,y} = wallSlotFromPointer(e, orient);
-    if(x!=null) placeWall(orient, x, y);
-  });
-
-  // --- Win Check ----------------------------------------------------------
-  function checkWin(){
-    for(const p of state.players){
-      if(p.pos.y === p.goalY){
-        alert(`Player ${p.id+1} wins!`);
-        state.tool = 'move';
-        toggleToolButtons();
-        board.style.pointerEvents='none';
-        return true;
-      }
-    }
-    return false;
-  }
-
-  // --- Undo / Snapshot ----------------------------------------------------
-  function snapshot(){
-    return JSON.stringify({
-      players: state.players.map(p=>({ id:p.id, pos:{...p.pos}, goalY:p.goalY, walls:p.walls })),
-      turn: state.turn,
-      hWalls:[...state.hWalls], vWalls:[...state.vWalls]
-    });
-  }
-  function restore(json){
-    const s = JSON.parse(json);
-    state.players.forEach((p,i)=>{ p.pos=s.players[i].pos; p.goalY=s.players[i].goalY; p.walls=s.players[i].walls; });
-    state.turn = s.turn;
-    state.hWalls = new Set(s.hWalls);
-    state.vWalls = new Set(s.vWalls);
-  }
-
-  function undo(){
-    const snap = state.history.pop();
-    if(!snap) return;
-    restore(snap);
-    renderAll();
-    board.style.pointerEvents='auto';
-  }
-
-  // --- UI Controls --------------------------------------------------------
-  function toggleToolButtons(){
-    $('#tool-move').classList.toggle('active', state.tool==='move');
-    $('#tool-wall-h').classList.toggle('active', state.tool==='wall-h');
-    $('#tool-wall-v').classList.toggle('active', state.tool==='wall-v');
-  }
-
-  $('#tool-move').addEventListener('click', ()=>{ state.tool='move'; toggleToolButtons(); renderAll(); });
-  $('#tool-wall-h').addEventListener('click', ()=>{ state.tool='wall-h'; toggleToolButtons(); });
-  $('#tool-wall-v').addEventListener('click', ()=>{ state.tool='wall-v'; toggleToolButtons(); });
-  $('#btn-undo').addEventListener('click', undo);
-  $('#btn-new').addEventListener('click', ()=>{ newGame(); });
-
-  const chkAI = $('#chk-ai'); if(chkAI){ chkAI.addEventListener('change', e=>{ ai.enabled = e.target.checked; maybeAIMove(); }); }
-  const segAI = $('#ai-diff'); if(segAI){ segAI.addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; ai.diff = b.dataset.diff; [...segAI.querySelectorAll('button')].forEach(x=>x.classList.toggle('active', x.dataset.diff===ai.diff)); }); }
-  const chkDiag = $('#chk-diag'); if(chkDiag){ chkDiag.addEventListener('change', ()=>{ newGame(); }); }
-
-  // --- Path helpers for AI ------------------------------------------------
-  function pathLen(pid){ const p=shortestPath(pid); return (p&&p.length)? (p.length-1) : 999; }
-
-  // --- AI Player ----------------------------------------------------------
-  function wallCandidatesFor(pid){
-    const opp=1-pid; const path=shortestPath(opp) || [];
-    const cand=new Set(); const list=[];
-    function push(orient,x,y){
-      if(x==null||y==null) return;
-      if(x<0||y<0||x>7||y>7) return;
-      if(!canPlaceWall(orient,x,y)) return; // strict check here
-      const k=orient+':'+x+','+y; if(!cand.has(k)){ cand.add(k); list.push({type:'wall', orient, x, y}); }
-    }
-    for(let i=0;i<path.length-1;i++){
-      const a=path[i], b=path[i+1];
-      if(a.x!==b.x){ const x=Math.min(a.x,b.x), y=a.y; push('v', x, y); push('v', x, y-1); }
-      else { const x=a.x, y=Math.min(a.y,b.y); push('h', x, y); push('h', x-1, y); }
-    }
-    return list;
-  }
-
-  function evaluate(){
-    const me=ai.side; const other=1-me;
-    if(state.players[me].pos.y===state.players[me].goalY) return 10000;
-    if(state.players[other].pos.y===state.players[other].goalY) return -10000;
-    const myD=pathLen(me), opD=pathLen(other);
-    const w=(state.players[me].walls - state.players[other].walls);
-    return (opD - myD)*10 + w;
-  }
-
-  function isValidWallSlot(x,y){ return Number.isInteger(x)&&Number.isInteger(y)&&x>=0&&x<=7&&y>=0&&y<=7; }
-  function simulate(action, fn){
-    // Guard against off-board or illegal wall actions during lookahead
-    if(action.type==='wall'){
-      if(!isValidWallSlot(action.x, action.y) || !canPlaceWall(action.orient, action.x, action.y)){
-        // Return very poor score without mutating state
-        return -1e9;
-      }
-    }
-    const snap=snapshot();
-    if(action.type==='move'){
-      const pid=state.turn; state.players[pid].pos={x:action.x, y:action.y}; state.turn=1-state.turn;
-    } else {
-      (action.orient==='h'? state.hWalls: state.vWalls).add(key(action.x,action.y));
-      state.players[state.turn].walls--; state.turn=1-state.turn;
-    }
-    const val=fn(); restore(snap); return val;
-  }
-
-  function generateActions(pid, limitWalls=8){
-    const actions = legalMoves(pid).map(m=>({type:'move', x:m.x, y:m.y}));
-    if(state.players[pid].walls>0){ let cands = wallCandidatesFor(pid);
-      cands.sort((A,B)=>{ const a=simulate({type:'wall',orient:A.orient,x:A.x,y:A.y}, ()=>evaluate()); const b=simulate({type:'wall',orient:B.orient,x:B.x,y:B.y}, ()=>evaluate()); return b-a; });
-      actions.push(...cands.slice(0, limitWalls));
-    }
-    return actions;
-  }
-
-  function minimax(depth, alpha, beta){
-    if(depth===0) return evaluate();
-    const pid=state.turn; const maximizing = (pid===ai.side);
-    const actions = generateActions(pid, 8); if(actions.length===0) return evaluate();
-    if(maximizing){ let best=-1e9; for(const a of actions){ const v=simulate(a, ()=>minimax(depth-1, alpha, beta)); if(v>best) best=v; if(v>alpha) alpha=v; if(beta<=alpha) break; } return best; }
-    else { let best=1e9; for(const a of actions){ const v=simulate(a, ()=>minimax(depth-1, alpha, beta)); if(v<best) best=v; if(v<beta) beta=v; if(beta<=alpha) break; } return best; }
-  }
-
-  function aiChoose(){
-    const pid=state.turn; const diff=ai.diff;
-    if(diff==='easy'){
-      const moves = legalMoves(pid); if(moves.length===0) return null;
-      let best=moves[0], bestVal=Infinity; for(const m of moves){ const val=simulate({type:'move', x:m.x, y:m.y}, ()=>pathLen(ai.side)); if(val<bestVal){ bestVal=val; best=m; } }
-      return {type:'move', x:best.x, y:best.y};
-    }
-    if(diff==='med'){
-      let bestAct=null, bestScore=-1e9; const acts=generateActions(pid, 8);
-      for(const a of acts){ if(a.type==='wall' && !canPlaceWall(a.orient,a.x,a.y)) continue; const score=simulate(a, ()=>evaluate()); if(score>bestScore){ bestScore=score; bestAct=a; } }
-      return bestAct;
-    }
-    let bestAct=null, best=-1e9; const acts=generateActions(pid, 10);
-    for(const a of acts){ if(a.type==='wall' && !canPlaceWall(a.orient,a.x,a.y)) continue; const score=simulate(a, ()=>minimax(2, -1e9, 1e9)); if(score>best){ best=score; bestAct=a; } }
-    return bestAct;
-  }
-
-  function maybeAIMove(){
-    if(!ai.enabled) return;
-    if(state.turn!==ai.side) { board.style.pointerEvents='auto'; return; }
-    if(checkWin()) return;
-    if(aiThinking) return; aiThinking=true; board.style.pointerEvents='none';
-    setTimeout(()=>{ const act=aiChoose(); if(!act){ aiThinking=false; board.style.pointerEvents='auto'; return; }
-      if(act.type==='move') movePawnTo(state.turn, act.x, act.y); else placeWall(act.orient, act.x, act.y);
-      aiThinking=false; board.style.pointerEvents='auto'; }, 120);
-  }
-
-  // --- New Game / Boot ----------------------------------------------------
-  function newGame(){
-    const useDiag = ($('#chk-diag') && $('#chk-diag').checked);
-    if(useDiag){
-      state.players[0].pos = {x:0,y:0}; state.players[0].goalY = 8; state.players[0].walls = WALLS_PER_PLAYER;
-      state.players[1].pos = {x:8,y:8}; state.players[1].goalY = 0; state.players[1].walls = WALLS_PER_PLAYER;
-    } else {
-      state.players[0].pos = {x:4,y:0}; state.players[0].goalY = 8; state.players[0].walls = WALLS_PER_PLAYER;
-      state.players[1].pos = {x:4,y:8}; state.players[1].goalY = 0; state.players[1].walls = WALLS_PER_PLAYER;
-    }
-    state.hWalls.clear(); state.vWalls.clear();
-    state.history = [];
-    state.turn = 0;
-    state.tool='move'; toggleToolButtons();
-    board.style.pointerEvents='auto';
-    renderAll();
-    setTimeout(maybeAIMove, 100);
-  }
-
-  buildCells();
+}
+function beginReplayFromText(text){
+  const {mode,actions}=parseKifuToActions(text);
+  if($('#chk-diag')) $('#chk-diag').checked=(mode==='diagonal');
   newGame();
+  replayActions=actions; replayIndex=0;
+  recordKifu=false; ai.enabled=false; isReplaying=true;
+}
+function stepReplay(){
+  if(!isReplaying||replayIndex>=replayActions.length) return stopReplay();
+  try{ applyAction(replayActions[replayIndex++]); }
+  catch(e){ alert('Replay error: '+e.message); stopReplay(); }
+}
+function playReplay(){
+  const speed=parseInt($('#replay-speed').value,10)||400;
+  if(replayTimer) clearInterval(replayTimer);
+  replayTimer=setInterval(()=>{
+    if(replayIndex>=replayActions.length){ stopReplay(); return; }
+    stepReplay();
+  }, speed);
+}
+function stopReplay(){
+  if(replayTimer){ clearInterval(replayTimer); replayTimer=null; }
+  isReplaying=false; recordKifu=true;
+}
+$('#btn-replay').addEventListener('click',()=>{
+  const text=$('#kifu-text').value.trim();
+  if(!text){ alert('棋譜テキストが空です。まず Import するか、テキストを貼り付けてください。'); return; }
+  beginReplayFromText(text); playReplay();
+});
+$('#btn-replay-step').addEventListener('click',()=>{
+  if(!isReplaying){
+    const text=$('#kifu-text').value.trim();
+    if(!text){ alert('棋譜テキストが空です。'); return; }
+    beginReplayFromText(text);
+  }
+  stepReplay();
+});
+$('#btn-replay-stop').addEventListener('click',()=>{ stopReplay(); });
+
+
+  // -------------------- New Game / Boot --------------------
+  function newGame(){ const useDiag = ($('#chk-diag')&&$('#chk-diag').checked); if(useDiag){ state.players[0].pos={x:0,y:0}; state.players[0].goalY=8; state.players[0].walls=WALLS_PER_PLAYER; state.players[1].pos={x:8,y:8}; state.players[1].goalY=0; state.players[1].walls=WALLS_PER_PLAYER; state.kifuMeta.mode='diagonal'; } else { state.players[0].pos={x:4,y:0}; state.players[0].goalY=8; state.players[0].walls=WALLS_PER_PLAYER; state.players[1].pos={x:4,y:8}; state.players[1].goalY=0; state.players[1].walls=WALLS_PER_PLAYER; state.kifuMeta.mode='standard'; }
+    state.hWalls.clear(); state.vWalls.clear(); state.history=[]; state.turn=0; state.tool='move'; board.style.pointerEvents='auto'; state.kifu=[]; toggleToolButtons(); renderAll(); setTimeout(maybeAIMove,100); }
+
+  buildCells(); newGame();
   </script>
 </body>
 </html>
