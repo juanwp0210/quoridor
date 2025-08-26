@@ -22,74 +22,28 @@
       --shadow: 0 6px 24px rgba(0,0,0,.35);
     }
 
-    html, body {
-      height: 100%;
-      background: radial-gradient(1200px 800px at 10% -10%, #1a1f39 0%, var(--bg) 70%);
-      color: var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif;
-      margin:0;
-    }
+    html, body { height: 100%; background: radial-gradient(1200px 800px at 10% -10%, #1a1f39 0%, var(--bg) 70%); color: var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif; margin:0; }
 
-    .app{
-      display:grid;
-      grid-template-rows: auto 1fr;
-      min-height:100dvh;
-    }
-
-    header{
-      display:flex; align-items:center; gap:12px;
-      padding:14px clamp(12px,3vw,24px);
-      background: linear-gradient(180deg, #191d31 0%, #15192c 100%);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      position: sticky; top:0; z-index:10;
-    }
+    .app{ display:grid; grid-template-rows: auto 1fr; min-height:100dvh; }
+    header{ display:flex; align-items:center; gap:12px; padding:14px clamp(12px,3vw,24px); background: linear-gradient(180deg, #191d31 0%, #15192c 100%); border-bottom: 1px solid rgba(255,255,255,.06); position: sticky; top:0; z-index:10; }
     header h1{ font-size: 18px; margin:0; letter-spacing:.3px }
     .spacer{ flex: 1 }
 
-    main{
-      display:grid;
-      grid-template-columns: minmax(300px, 1fr) auto minmax(260px, 380px);
-      gap: clamp(12px, 3.5vw, 28px);
-      padding: clamp(12px, 3.5vw, 28px);
-      align-items: start;
-    }
+    main{ display:grid; grid-template-columns: minmax(300px, 1fr) auto minmax(260px, 380px); gap: clamp(12px, 3.5vw, 28px); padding: clamp(12px, 3.5vw, 28px); align-items: start; }
 
     /* BOARD GRID: 17x17 tracks = 9 cells + 8 wall lanes, both directions */
-    #board{
-      display:grid;
-      grid-template-columns: repeat(8, var(--cell) var(--gap)) var(--cell);
-      grid-template-rows: repeat(8, var(--cell) var(--gap)) var(--cell);
-      background: linear-gradient(180deg, #101322, #12162a);
-      border-radius: var(--board-radius);
-      padding: 14px;
-      box-shadow: var(--shadow);
-      position: relative;
-      user-select:none;
-    }
+    #board{ display:grid; grid-template-columns: repeat(8, var(--cell) var(--gap)) var(--cell); grid-template-rows: repeat(8, var(--cell) var(--gap)) var(--cell); background: linear-gradient(180deg, #101322, #12162a); border-radius: var(--board-radius); padding: 14px; box-shadow: var(--shadow); position: relative; user-select:none; }
 
     /* 9x9 playable squares */
-    .cell{
-      width: var(--cell); height: var(--cell);
-      background: linear-gradient(180deg, #2a2f52, #212542);
-      border-radius: 8px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
-      position: relative;
-      transition: transform .08s ease;
-    }
+    .cell{ width: var(--cell); height: var(--cell); background: linear-gradient(180deg, #2a2f52, #212542); border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); position: relative; transition: transform .08s ease; }
     .cell:hover{ outline: 2px solid rgba(255,255,255,.06); outline-offset: -2px }
 
     /* Pawn pieces */
-    .pawn{
-      width: 56%; height: 56%;
-      border-radius: 50%;
-      position: absolute; inset:0; margin:auto;
-      box-shadow: 0 6px 16px rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,255,255,.15);
-      transform: translateZ(0);
-    }
+    .pawn{ width: 56%; height: 56%; border-radius: 50%; position: absolute; inset:0; margin:auto; box-shadow: 0 6px 16px rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,255,255,.15); transform: translateZ(0); }
     .p0{ background: radial-gradient(circle at 30% 25%, #9bc0ff, #5c86ff); }
     .p1{ background: radial-gradient(circle at 30% 25%, #ffd59a, #ff9b40); }
 
-    /* Wall segments actually placed */
+    /* Walls */
     .wall{ position:absolute; background: linear-gradient(180deg, #84521a, #5a3511); border-radius: 6px; box-shadow: 0 8px 22px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.08) }
     .wall.v{ width: var(--gap); height: calc(var(--cell)*2 + var(--gap)); }
     .wall.h{ height: var(--gap); width: calc(var(--cell)*2 + var(--gap)); }
@@ -100,35 +54,19 @@
     .ghost.invalid{ background: linear-gradient(180deg, rgba(255,107,107,.85), rgba(206,67,67,.85)); box-shadow: 0 0 0 2px rgba(255,255,255,.15) inset, 0 0 0 1px rgba(0,0,0,.4); }
 
     /* Move targets */
-    .move-dot{
-      position:absolute; width: 18px; height: 18px; border-radius: 50%;
-      background: var(--good); box-shadow: 0 2px 10px rgba(51,209,122,.55);
-      transform: translate(-50%, -50%); cursor: pointer;
-      outline: 2px solid rgba(255,255,255,.12);
-    }
+    .move-dot{ position:absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--good); box-shadow: 0 2px 10px rgba(51,209,122,.55); transform: translate(-50%, -50%); cursor: pointer; outline: 2px solid rgba(255,255,255,.12); }
 
-    /* Right panel */
-    .panel{
-      background: var(--panel); padding: 16px; border-radius: 14px; box-shadow: var(--shadow);
-      display:flex; flex-direction:column; gap:14px;
-    }
+    /* Panels */
+    .panel{ background: var(--panel); padding: 16px; border-radius: 14px; box-shadow: var(--shadow); display:flex; flex-direction:column; gap:14px; }
     .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
     .muted{ color: var(--muted); font-size: 13px }
 
-    .btn{
-      appearance:none; border:1px solid rgba(255,255,255,.08); color:var(--ink);
-      background: linear-gradient(180deg, #1c2140, #141939);
-      padding:10px 14px; border-radius:12px; cursor:pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,.25);
-      font-weight:600; letter-spacing:.3px;
-    }
+    .btn{ appearance:none; border:1px solid rgba(255,255,255,.08); color:var(--ink); background: linear-gradient(180deg, #1c2140, #141939); padding:10px 14px; border-radius:12px; cursor:pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25); font-weight:600; letter-spacing:.3px; }
     .btn:hover{ border-color: rgba(255,255,255,.18) }
     .btn.primary{ background: linear-gradient(180deg, #2b4b97, #1a2e62); border-color: rgba(122,162,255,.45) }
     .btn.warn{ background: linear-gradient(180deg, #6b1f2a, #3b0f15); border-color: rgba(255,107,107,.45) }
 
-    .seg{
-      display:inline-grid; grid-auto-flow:column; gap:6px; background:#0f1327; padding:6px; border-radius:12px; border:1px solid rgba(255,255,255,.06)
-    }
+    .seg{ display:inline-grid; grid-auto-flow:column; gap:6px; background:#0f1327; padding:6px; border-radius:12px; border:1px solid rgba(255,255,255,.06) }
     .seg button{ background:transparent; border:none; color:var(--muted); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700 }
     .seg button.active{ background: #24305b; color:var(--ink); outline:1px solid rgba(255,255,255,.12) }
 
@@ -140,11 +78,7 @@
 
     footer{ color: var(--muted); text-align:center; padding: 8px 0 18px }
 
-    @media (max-width: 980px){
-      main{ grid-template-columns: 1fr; justify-items:center }
-      #board{ order:1 }
-      .panel{ order:2; width:min(700px, 100%) }
-    }
+    @media (max-width: 980px){ main{ grid-template-columns: 1fr; justify-items:center } #board{ order:1 } .panel{ order:2; width:min(700px, 100%) } }
   </style>
 </head>
 <body>
@@ -162,6 +96,7 @@
     </header>
 
     <main>
+      <!-- Left panel -->
       <div class="panel" style="justify-self:center">
         <div class="row">
           <div class="badge"><span class="dot p0"></span> P1 Walls: <strong id="p0-walls" style="margin-left:6px">10</strong></div>
@@ -181,7 +116,7 @@
           </div>
         </div>
         <div class="row">
-          <label class="badge" style="cursor:pointer"><input id="chk-diag" type="checkbox" style="margin-right:8px"/> Diagonal start mode</label>
+          <label class="badge" style="cursor:pointer"><input id="chk-diag" type="checkbox" style="margin-right:8px"/> Diagonal start (P1:↖ / P2:↘)</label>
         </div>
         <div class="legend">
           <div class="muted">操作:</div>
@@ -191,8 +126,10 @@
         </div>
       </div>
 
+      <!-- Board -->
       <div id="board" aria-label="Quoridor board" role="application"></div>
 
+      <!-- Right panel -->
       <div class="panel">
         <div style="font-weight:700">How to Deploy on GitHub Pages</div>
         <ol class="muted" style="margin:0 0 8px 18px; line-height:1.6">
@@ -203,13 +140,11 @@
         </ol>
         <div class="muted">（git.io は短縮 URL。必要なら GitHub Pages の URL を短縮して使えます）</div>
         <hr style="border:none; border-top:1px solid rgba(255,255,255,.08)">
-        <div class="muted">Rules implemented: standard movement, jumps &amp; diagonal steps around a blocked opponent, wall placement with crossing/overlap checks, and path-existence validation (BFS). 2P local play.</div>
+        <div class="muted">Rules implemented: standard movement, jumps &amp; diagonal steps around a blocked opponent, wall placement with crossing/overlap checks, and path-existence validation (BFS). 2P local play. Optional AI (P2) with Easy/Med/Hard.</div>
       </div>
     </main>
 
-    <footer>
-      © 2025 Quoridor (browser edition). No backend required.
-    </footer>
+    <footer>© 2025 Quoridor (browser edition). No backend required.</footer>
   </div>
 
   <script>
@@ -244,17 +179,13 @@
   // --- Board Construction -------------------------------------------------
   const board = $('#board');
 
-  // Build 9x9 playable cells onto the 17x17 track grid (cells sit at odd indices)
   function buildCells(){
-    // Clear board children (walls and hints re-added by render)
     board.innerHTML = '';
-
     for(let y=0; y<BOARD_N; y++){
       for(let x=0; x<BOARD_N; x++){
         const c = el('div', { className:'cell' });
         c.dataset.x = String(x);
         c.dataset.y = String(y);
-        // Place on grid (1-based line indices)
         c.style.gridColumn = (1 + x*2) + ' / span 1';
         c.style.gridRow    = (1 + y*2) + ' / span 1';
         c.addEventListener('click', () => onCellClick(x,y));
@@ -269,70 +200,74 @@
 
   // Is movement blocked between (x,y) and (x+1,y) ? (right/left)
   function blockedLR(x,y){
-    // movement across vertical boundary at column x/x+1; blocked if vertical wall at (x,y) or (x,y-1)
     return hasVerticalWall(x, y) || hasVerticalWall(x, y-1);
   }
   // Is movement blocked between (x,y) and (x,y+1)? (down/up)
   function blockedUD(x,y){
-    // movement across horizontal boundary at row y/y+1; blocked if horizontal wall at (x,y) or (x-1,y)
     return hasHorizontalWall(x, y) || hasHorizontalWall(x-1, y);
   }
 
   // Validate placing a wall of orientation 'h'/'v' at (x,y) [0..7]
-  function canPlaceWall(orient, x, y){
-    if(x<0||y<0||x>7||y>7) return false;
-    if(state.players[state.turn].walls <= 0) return false;
-    if(orient==='h'){
-      // Cannot overlap existing horizontal
-      if(hasHorizontalWall(x,y)) return false;
-      // Cannot cross an existing vertical at same slot
-      if(hasVerticalWall(x,y)) return false;
-    } else {
-      if(hasVerticalWall(x,y)) return false;
-      if(hasHorizontalWall(x,y)) return false;
-    }
-    // Simulate placement & ensure both players keep at least one path
-    const undoToken = snapshot();
-    if(orient==='h') state.hWalls.add(key(x,y)); else state.vWalls.add(key(x,y));
-    const ok = playersHavePaths();
-    // rollback
-    restore(undoToken);
-    return ok;
+function canPlaceWall(orient, x, y){
+  // 盤外チェック（壁スロットは 0..7）
+  if (x < 0 || y < 0 || x > 7 || y > 7) return false;
+
+  // 壁残数
+  if (state.players[state.turn].walls <= 0) return false;
+
+  if (orient === 'h') {
+    // 同じスロット重複
+    if (hasHorizontalWall(x, y)) return false;
+
+    // ★半重なり防止：同向きの隣接スロットに壁があるなら不可（x±1, y）
+    if (hasHorizontalWall(x - 1, y) || hasHorizontalWall(x + 1, y)) return false;
+
+    // 交差（中央十字での交差は禁止）
+    if (hasVerticalWall(x, y)) return false;
+  } else { // 'v'
+    if (hasVerticalWall(x, y)) return false;
+
+    // ★半重なり防止：同向きの隣接スロットに壁があるなら不可（x, y±1）
+    if (hasVerticalWall(x, y - 1) || hasVerticalWall(x, y + 1)) return false;
+
+    // 交差禁止
+    if (hasHorizontalWall(x, y)) return false;
   }
+
+  // 置いた結果、両者にゴールへの経路が残ることを確認（BFS）
+  const snap = snapshot();
+  if (orient === 'h') state.hWalls.add(key(x, y)); else state.vWalls.add(key(x, y));
+  const ok = playersHavePaths();
+  restore(snap);
+  return ok;
+}
+
 
   // --- Movement -----------------------------------------------------------
   function neighborsFrom(x,y){
     const n=[];
-    // Left
     if(x>0 && !blockedLR(x-1,y)) n.push({x:x-1,y});
-    // Right
     if(x<BOARD_N-1 && !blockedLR(x,y)) n.push({x:x+1,y});
-    // Up
     if(y>0 && !blockedUD(x,y-1)) n.push({x,y:y-1});
-    // Down
     if(y<BOARD_N-1 && !blockedUD(x,y)) n.push({x,y:y+1});
     return n;
   }
 
-  // Legal moves including jumps and diagonal side-steps
   function legalMoves(pid){
     const me = state.players[pid];
     const other = state.players[1-pid];
     const moves = [];
 
     const adj = neighborsFrom(me.pos.x, me.pos.y);
-    // If opponent is adjacent
     const oppAdj = adj.find(p => p.x===other.pos.x && p.y===other.pos.y);
     if(oppAdj){
       const dx = other.pos.x - me.pos.x;
       const dy = other.pos.y - me.pos.y;
-      // Check straight jump beyond opponent
       const bx = other.pos.x + Math.sign(dx);
       const by = other.pos.y + Math.sign(dy);
       const inBoard = bx>=0 && bx<BOARD_N && by>=0 && by<BOARD_N;
       let straightBlocked = true;
       if(dx!==0){
-        // Horizontal relationship; check block between opponent and beyond
         if(inBoard && !blockedLR(Math.min(other.pos.x, bx), other.pos.y)){
           straightBlocked = false;
           moves.push({x:bx, y:by});
@@ -344,13 +279,12 @@
         }
       }
       if(straightBlocked){
-        // Diagonal side-steps around opponent, provided the path from opponent to that diagonal isn't walled
-        if(dx!==0){ // opponent left/right
+        if(dx!==0){
           const cand1 = {x: other.pos.x, y: other.pos.y-1};
           const cand2 = {x: other.pos.x, y: other.pos.y+1};
           if(cand1.y>=0 && !blockedUD(other.pos.x, cand1.y)) moves.push(cand1);
           if(cand2.y<BOARD_N && !blockedUD(other.pos.x, other.pos.y)) moves.push(cand2);
-        } else { // opponent up/down
+        } else {
           const cand1 = {x: other.pos.x-1, y: other.pos.y};
           const cand2 = {x: other.pos.x+1, y: other.pos.y};
           if(cand1.x>=0 && !blockedLR(cand1.x, other.pos.y)) moves.push(cand1);
@@ -358,20 +292,13 @@
         }
       }
     }
-    // Normal adjacent moves (excluding stepping onto opponent square)
-    for(const p of adj){
-      if(!(p.x===other.pos.x && p.y===other.pos.y)) moves.push(p);
-    }
-
-    // Deduplicate
+    for(const p of adj){ if(!(p.x===other.pos.x && p.y===other.pos.y)) moves.push(p); }
     const seen = new Set();
     return moves.filter(m=>{ const k=key(m.x,m.y); if(seen.has(k)) return false; seen.add(k); return true; });
   }
 
   // --- Pathfinding to validate placements --------------------------------
-  function playersHavePaths(){
-    return [0,1].every(id => hasPathToGoal(id));
-  }
+  function playersHavePaths(){ return [0,1].every(id => hasPathToGoal(id)); }
 
   function hasPathToGoal(pid){
     const start = state.players[pid].pos;
@@ -383,15 +310,12 @@
       if(p.y === goalY) return true;
       for(const n of neighborsFrom(p.x,p.y)){
         const k = key(n.x,n.y);
-        if(!seen.has(k)){
-          seen.add(k); Q.push(n);
-        }
+        if(!seen.has(k)){ seen.add(k); Q.push(n); }
       }
     }
     return false;
   }
 
-  // Compute one shortest path (for UI hints)
   function shortestPath(pid){
     const start = state.players[pid].pos;
     const goalY = state.players[pid].goalY;
@@ -401,13 +325,9 @@
     while(Q.length){
       const p=Q.shift();
       if(p.y===goalY){
-        // reconstruct
         const path=[p];
         let k=key(p.x,p.y);
-        while(prev.has(k)){
-          const v = prev.get(k);
-          path.push(v); k = key(v.x,v.y);
-        }
+        while(prev.has(k)){ const v = prev.get(k); path.push(v); k = key(v.x,v.y); }
         return path.reverse();
       }
       for(const n of neighborsFrom(p.x,p.y)){
@@ -419,26 +339,20 @@
   }
 
   // --- Rendering ----------------------------------------------------------
-  function clearDynamicOverlays(){
-    // Remove all .wall, .pawn, .move-dot, .ghost overlays
-    [...board.querySelectorAll('.wall, .pawn, .move-dot, .ghost')].forEach(n=>n.remove());
-  }
+  function clearDynamicOverlays(){ [...board.querySelectorAll('.wall, .pawn, .move-dot, .ghost')].forEach(n=>n.remove()); }
 
-  // Convert logical wall slot (orient, x,y) to board pixel-positioned DOM node
   function placeWallNode(orient, x, y, cls='wall'){
     const node = el('div', { className: cls + ' ' + (orient==='h'?'h':'v') });
-    // Compute CSS absolute position relative to #board padding box
-    const pad = 14; // board padding
+    const pad = 14;
     const cell = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell'));
     const gap  = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
-
     if(orient==='h'){
       const colPx = pad + (x * (cell + gap));
-      const rowPx = pad + (y * (cell + gap)) + cell; // gap row after cell
+      const rowPx = pad + (y * (cell + gap)) + cell;
       node.style.left = colPx + 'px';
       node.style.top  = rowPx + 'px';
     } else {
-      const colPx = pad + (x * (cell + gap)) + cell; // gap col after cell
+      const colPx = pad + (x * (cell + gap)) + cell;
       const rowPx = pad + (y * (cell + gap));
       node.style.left = colPx + 'px';
       node.style.top  = rowPx + 'px';
@@ -448,9 +362,7 @@
   }
 
   function renderWalls(){
-    // Horizontal
     for(const s of state.hWalls){ const [x,y] = parseKey(s); placeWallNode('h',x,y); }
-    // Vertical
     for(const s of state.vWalls){ const [x,y] = parseKey(s); placeWallNode('v',x,y); }
   }
 
@@ -467,7 +379,6 @@
     if(!$('#chk-hints').checked || state.tool!=='move') return;
     const me = state.players[state.turn];
     for(const m of legalMoves(state.turn)){
-      // position dot at cell center
       const cellEl = board.querySelector(`.cell[data-x="${m.x}"][data-y="${m.y}"]`);
       const dot = el('div', { className:'move-dot' });
       const rect = cellEl.getBoundingClientRect();
@@ -493,9 +404,7 @@
     }
   }
 
-  function resetCellOutlines(){
-    for(const c of board.querySelectorAll('.cell')) c.style.outline='none';
-  }
+  function resetCellOutlines(){ for(const c of board.querySelectorAll('.cell')) c.style.outline='none'; }
 
   function renderInfo(){
     $('#p0-walls').textContent = state.players[0].walls;
@@ -512,43 +421,16 @@
     renderPaths();
     renderInfo();
   }
-  // --- AI Player ----------------------------------------------------------
-  function pathLen(pid){ const p=shortestPath(pid); return (p&&p.length)? (p.length-1) : 999; }
-  function wallCandidatesFor(pid){
-    const opp=1-pid; const path=shortestPath(opp) || []; const cand=new Set(); const list=[];
-    function push(orient,x,y){ if(x==null||y==null) return; if(orient==='h'){ if(x<0||x>7||y<0||y>7) return; } else { if(x<0||x>7||y<0||y>7) return; } if(!canPlaceWall(orient,x,y)) return; const k=orient+':'+x+','+y; if(!cand.has(k)){ cand.add(k); list.push({type:'wall', orient, x, y}); } }
-    for(let i=0;i<path.length-1;i++){ const a=path[i], b=path[i+1]; if(a.x!==b.x){ const x=Math.min(a.x,b.x), y=a.y; push('v', x, y); push('v', x, y-1); } else { const x=a.x, y=Math.min(a.y,b.y); push('h', x, y); push('h', x-1, y); } }
-    return list;
-  }
-  function evaluate(){ const me=ai.side; const other=1-me; const myWin=(state.players[me].pos.y===state.players[me].goalY); const opWin=(state.players[other].pos.y===state.players[other].goalY); if(myWin) return 10000; if(opWin) return -10000; const myD=pathLen(me), opD=pathLen(other); const w=(state.players[me].walls - state.players[other].walls); return (opD - myD)*10 + w; }
-  function generateActions(pid, limitWalls=10){ const actions = legalMoves(pid).map(m=>({type:'move', x:m.x, y:m.y})); if(state.players[pid].walls>0){ let cands = wallCandidatesFor(pid); // rank by heuristic
-      cands.sort((A,B)=>{
-        const a=simulate({type:'wall',orient:A.orient,x:A.x,y:A.y}, ()=>evaluate());
-        const b=simulate({type:'wall',orient:B.orient,x:B.x,y:B.y}, ()=>evaluate());
-        return b-a; });
-      actions.push(...cands.slice(0, limitWalls)); }
-    return actions; }
-  function simulate(action, fn){ const snap=snapshot(); if(action.type==='move'){ const pid=state.turn; state.players[pid].pos={x:action.x, y:action.y}; state.turn=1-state.turn; } else { (action.orient==='h'? state.hWalls: state.vWalls).add(key(action.x,action.y)); state.players[state.turn].walls--; state.turn=1-state.turn; } const val=fn(); restore(snap); return val; }
-  function minimax(depth, alpha, beta){ if(depth===0) return evaluate(); const pid=state.turn; const maximizing = (pid===ai.side); const actions = generateActions(pid, 8); if(actions.length===0) return evaluate(); if(maximizing){ let best=-1e9; for(const a of actions){ const v=simulate(a, ()=>minimax(depth-1, alpha, beta)); if(v>best) best=v; if(v>alpha) alpha=v; if(beta<=alpha) break; } return best; } else { let best=1e9; for(const a of actions){ const v=simulate(a, ()=>minimax(depth-1, alpha, beta)); if(v<best) best=v; if(v<beta) beta=v; if(beta<=alpha) break; } return best; } }
-  function aiChoose(){ const pid=state.turn; const diff=ai.diff; if(diff==='easy'){ // greedy move towards goal, no walls
-      const moves = legalMoves(pid); if(moves.length===0) return null; let best=moves[0], bestVal=Infinity; for(const m of moves){ const val=simulate({type:'move', x:m.x, y:m.y}, ()=>pathLen(ai.side)); if(val<bestVal){ bestVal=val; best=m; } } return {type:'move', x:best.x, y:best.y}; }
-    if(diff==='med'){ let bestAct=null, bestScore=-1e9; const acts=generateActions(pid, 8); for(const a of acts){ const score=simulate(a, ()=>evaluate()); if(score>bestScore){ bestScore=score; bestAct=a; } } return bestAct; }
-    // hard
-    let bestAct=null, best=-1e9; const acts=generateActions(pid, 10); for(const a of acts){ const score=simulate(a, ()=>minimax(2, -1e9, 1e9)); if(score>best){ best=score; bestAct=a; } } return bestAct; }
-  function maybeAIMove(){ if(!ai.enabled) return; if(state.turn!==ai.side) { board.style.pointerEvents='auto'; return; } if(checkWin()) return; if(aiThinking) return; aiThinking=true; board.style.pointerEvents='none'; setTimeout(()=>{ const act=aiChoose(); if(!act){ aiThinking=false; board.style.pointerEvents='auto'; return; } if(act.type==='move') movePawnTo(state.turn, act.x, act.y); else placeWall(act.orient, act.x, act.y); aiThinking=false; board.style.pointerEvents='auto'; }, 120); }
 
   // --- Interaction --------------------------------------------------------
   function onCellClick(x,y){
     if(state.tool !== 'move') return;
     const me = state.players[state.turn];
     const moves = legalMoves(state.turn);
-    if(moves.some(m=>m.x===x && m.y===y)){
-      movePawnTo(me.id, x, y);
-    }
+    if(moves.some(m=>m.x===x && m.y===y)) movePawnTo(me.id, x, y);
   }
 
   function commit(action){
-    // Push snapshot for undo
     state.history.push(snapshot());
     action();
     renderAll();
@@ -557,13 +439,9 @@
   }
 
   function movePawnTo(pid, x, y){
-    commit(()=>{
-      state.players[pid].pos = {x,y};
-      state.turn = 1 - state.turn;
-    });
+    commit(()=>{ state.players[pid].pos = {x,y}; state.turn = 1 - state.turn; });
   }
 
-  // Wall placement via tool buttons + hover ghost
   let ghost = null;
   function updateGhost(orient, x, y){
     if(ghost) ghost.remove();
@@ -581,21 +459,18 @@
     });
   }
 
-  // Map mouse position to nearest wall-slot (8x8 per orientation)
   function wallSlotFromPointer(evt, orient){
     const pad = 14; const cell = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell')); const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
     const r = board.getBoundingClientRect();
     const px = evt.clientX - r.left - pad;
     const py = evt.clientY - r.top  - pad;
     if(px<0||py<0) return {x:null,y:null};
-    // Convert to slot coordinates by dividing repeated (cell+gap) tiles
     const tile = cell + gap;
-    const tx = Math.floor(px / tile); // 0..8 (left cell index)
+    const tx = Math.floor(px / tile);
     const ty = Math.floor(py / tile);
     if(tx<0||tx>8||ty<0||ty>8) return {x:null,y:null};
 
     if(orient==='h'){
-      // horizontal wall sits on gap-row between ty and ty+1, left anchored at tx (0..7)
       const withinGapRow = (py % tile) >= cell && (py % tile) < tile;
       if(!withinGapRow || tx>=8 || ty>=8) return {x:null,y:null};
       return {x:tx, y:ty};
@@ -616,7 +491,7 @@
   board.addEventListener('mouseleave', ()=>{ if(ghost){ ghost.remove(); ghost=null; } });
   board.addEventListener('click', (e)=>{
     const tool = state.tool;
-    if(tool==='move') return; // handled by cells
+    if(tool==='move') return;
     const orient = tool==='wall-h' ? 'h' : 'v';
     const {x,y} = wallSlotFromPointer(e, orient);
     if(x!=null) placeWall(orient, x, y);
@@ -627,7 +502,6 @@
     for(const p of state.players){
       if(p.pos.y === p.goalY){
         alert(`Player ${p.id+1} wins!`);
-        // Freeze by disabling interactions until New Game
         state.tool = 'move';
         toggleToolButtons();
         board.style.pointerEvents='none';
@@ -673,21 +547,108 @@
   $('#tool-wall-v').addEventListener('click', ()=>{ state.tool='wall-v'; toggleToolButtons(); });
   $('#btn-undo').addEventListener('click', undo);
   $('#btn-new').addEventListener('click', ()=>{ newGame(); });
+
   const chkAI = $('#chk-ai'); if(chkAI){ chkAI.addEventListener('change', e=>{ ai.enabled = e.target.checked; maybeAIMove(); }); }
   const segAI = $('#ai-diff'); if(segAI){ segAI.addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; ai.diff = b.dataset.diff; [...segAI.querySelectorAll('button')].forEach(x=>x.classList.toggle('active', x.dataset.diff===ai.diff)); }); }
+  const chkDiag = $('#chk-diag'); if(chkDiag){ chkDiag.addEventListener('change', ()=>{ newGame(); }); }
 
-  document.addEventListener('keydown', (e)=>{
-    if(e.key==='m' || e.key==='M'){ state.tool='move'; toggleToolButtons(); renderAll(); }
-    if(e.key==='h' || e.key==='H'){ state.tool='wall-h'; toggleToolButtons(); }
-    if(e.key==='v' || e.key==='V'){ state.tool='wall-v'; toggleToolButtons(); }
-    if(e.key==='r' || e.key==='R'){ state.tool = state.tool==='wall-h' ? 'wall-v' : state.tool==='wall-v' ? 'wall-h' : state.tool; toggleToolButtons(); }
-    if(e.key==='u' || e.key==='U'){ undo(); }
-    if(e.key==='n' || e.key==='N'){ newGame(); }
-  });
+  // --- Path helpers for AI ------------------------------------------------
+  function pathLen(pid){ const p=shortestPath(pid); return (p&&p.length)? (p.length-1) : 999; }
 
+  // --- AI Player ----------------------------------------------------------
+  function wallCandidatesFor(pid){
+    const opp=1-pid; const path=shortestPath(opp) || [];
+    const cand=new Set(); const list=[];
+    function push(orient,x,y){
+      if(x==null||y==null) return;
+      if(x<0||y<0||x>7||y>7) return;
+      if(!canPlaceWall(orient,x,y)) return; // strict check here
+      const k=orient+':'+x+','+y; if(!cand.has(k)){ cand.add(k); list.push({type:'wall', orient, x, y}); }
+    }
+    for(let i=0;i<path.length-1;i++){
+      const a=path[i], b=path[i+1];
+      if(a.x!==b.x){ const x=Math.min(a.x,b.x), y=a.y; push('v', x, y); push('v', x, y-1); }
+      else { const x=a.x, y=Math.min(a.y,b.y); push('h', x, y); push('h', x-1, y); }
+    }
+    return list;
+  }
+
+  function evaluate(){
+    const me=ai.side; const other=1-me;
+    if(state.players[me].pos.y===state.players[me].goalY) return 10000;
+    if(state.players[other].pos.y===state.players[other].goalY) return -10000;
+    const myD=pathLen(me), opD=pathLen(other);
+    const w=(state.players[me].walls - state.players[other].walls);
+    return (opD - myD)*10 + w;
+  }
+
+  function isValidWallSlot(x,y){ return Number.isInteger(x)&&Number.isInteger(y)&&x>=0&&x<=7&&y>=0&&y<=7; }
+  function simulate(action, fn){
+    // Guard against off-board or illegal wall actions during lookahead
+    if(action.type==='wall'){
+      if(!isValidWallSlot(action.x, action.y) || !canPlaceWall(action.orient, action.x, action.y)){
+        // Return very poor score without mutating state
+        return -1e9;
+      }
+    }
+    const snap=snapshot();
+    if(action.type==='move'){
+      const pid=state.turn; state.players[pid].pos={x:action.x, y:action.y}; state.turn=1-state.turn;
+    } else {
+      (action.orient==='h'? state.hWalls: state.vWalls).add(key(action.x,action.y));
+      state.players[state.turn].walls--; state.turn=1-state.turn;
+    }
+    const val=fn(); restore(snap); return val;
+  }
+
+  function generateActions(pid, limitWalls=8){
+    const actions = legalMoves(pid).map(m=>({type:'move', x:m.x, y:m.y}));
+    if(state.players[pid].walls>0){ let cands = wallCandidatesFor(pid);
+      cands.sort((A,B)=>{ const a=simulate({type:'wall',orient:A.orient,x:A.x,y:A.y}, ()=>evaluate()); const b=simulate({type:'wall',orient:B.orient,x:B.x,y:B.y}, ()=>evaluate()); return b-a; });
+      actions.push(...cands.slice(0, limitWalls));
+    }
+    return actions;
+  }
+
+  function minimax(depth, alpha, beta){
+    if(depth===0) return evaluate();
+    const pid=state.turn; const maximizing = (pid===ai.side);
+    const actions = generateActions(pid, 8); if(actions.length===0) return evaluate();
+    if(maximizing){ let best=-1e9; for(const a of actions){ const v=simulate(a, ()=>minimax(depth-1, alpha, beta)); if(v>best) best=v; if(v>alpha) alpha=v; if(beta<=alpha) break; } return best; }
+    else { let best=1e9; for(const a of actions){ const v=simulate(a, ()=>minimax(depth-1, alpha, beta)); if(v<best) best=v; if(v<beta) beta=v; if(beta<=alpha) break; } return best; }
+  }
+
+  function aiChoose(){
+    const pid=state.turn; const diff=ai.diff;
+    if(diff==='easy'){
+      const moves = legalMoves(pid); if(moves.length===0) return null;
+      let best=moves[0], bestVal=Infinity; for(const m of moves){ const val=simulate({type:'move', x:m.x, y:m.y}, ()=>pathLen(ai.side)); if(val<bestVal){ bestVal=val; best=m; } }
+      return {type:'move', x:best.x, y:best.y};
+    }
+    if(diff==='med'){
+      let bestAct=null, bestScore=-1e9; const acts=generateActions(pid, 8);
+      for(const a of acts){ if(a.type==='wall' && !canPlaceWall(a.orient,a.x,a.y)) continue; const score=simulate(a, ()=>evaluate()); if(score>bestScore){ bestScore=score; bestAct=a; } }
+      return bestAct;
+    }
+    let bestAct=null, best=-1e9; const acts=generateActions(pid, 10);
+    for(const a of acts){ if(a.type==='wall' && !canPlaceWall(a.orient,a.x,a.y)) continue; const score=simulate(a, ()=>minimax(2, -1e9, 1e9)); if(score>best){ best=score; bestAct=a; } }
+    return bestAct;
+  }
+
+  function maybeAIMove(){
+    if(!ai.enabled) return;
+    if(state.turn!==ai.side) { board.style.pointerEvents='auto'; return; }
+    if(checkWin()) return;
+    if(aiThinking) return; aiThinking=true; board.style.pointerEvents='none';
+    setTimeout(()=>{ const act=aiChoose(); if(!act){ aiThinking=false; board.style.pointerEvents='auto'; return; }
+      if(act.type==='move') movePawnTo(state.turn, act.x, act.y); else placeWall(act.orient, act.x, act.y);
+      aiThinking=false; board.style.pointerEvents='auto'; }, 120);
+  }
+
+  // --- New Game / Boot ----------------------------------------------------
   function newGame(){
-    const diag = document.querySelector('#chk-diag')?.checked;
-    if(diag){
+    const useDiag = ($('#chk-diag') && $('#chk-diag').checked);
+    if(useDiag){
       state.players[0].pos = {x:0,y:0}; state.players[0].goalY = 8; state.players[0].walls = WALLS_PER_PLAYER;
       state.players[1].pos = {x:8,y:8}; state.players[1].goalY = 0; state.players[1].walls = WALLS_PER_PLAYER;
     } else {
@@ -703,7 +664,6 @@
     setTimeout(maybeAIMove, 100);
   }
 
-  // --- Boot ---------------------------------------------------------------
   buildCells();
   newGame();
   </script>
